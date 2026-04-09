@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-store";
 import VaultLogo from "@/components/VaultLogo";
 
-const publicPaths = ["/login", "/register"];
+const publicPaths = ["/login", "/register", "/forgot-password", "/reset-password"];
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading, loadUser } = useAuth();

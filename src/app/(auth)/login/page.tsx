@@ -82,6 +82,10 @@ export default function LoginPage() {
             </div>
           </div>
 
+          <div className="text-right">
+            <Link href="/forgot-password" className="text-xs text-primary-light hover:underline">Quên mật khẩu?</Link>
+          </div>
+
           {error && (
             <p className="text-sm text-danger bg-danger/10 px-4 py-2 rounded-xl">{error}</p>
           )}
