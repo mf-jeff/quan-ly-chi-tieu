@@ -3,11 +3,13 @@ import { prisma } from "@/lib/server/db";
 import { SignJWT } from "jose";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback");
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ error: "Email service chưa cấu hình" }, { status: 500 });
+    }
     const { email } = await req.json();
     if (!email) return NextResponse.json({ error: "Email là bắt buộc" }, { status: 400 });
 
@@ -29,6 +31,7 @@ export async function POST(req: NextRequest) {
     const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
     // Send email
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: "Vault <onboarding@resend.dev>",
       to: email,
