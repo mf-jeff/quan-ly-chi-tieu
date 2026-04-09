@@ -152,25 +152,9 @@ button:focus-visible {
   filter: brightness(1.08);
 }
 
-/* ===== Button Ripple + Press ===== */
-button {
-  position: relative;
-  overflow: hidden;
-}
+/* ===== Button Press ===== */
 button:active:not(:disabled) {
   transform: scale(0.97);
-}
-button::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), var(--ring) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 300ms ease;
-  pointer-events: none;
-}
-button:active::after {
-  opacity: 0.1;
 }
 
 /* ===== Interactive Row Hover ===== */
@@ -258,14 +242,10 @@ button:active::after {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Touch-friendly minimum sizes */
+/* Touch-friendly — only prevent iOS zoom */
 @media (max-width: 1023px) {
-  button, a, select, input[type="checkbox"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
   input, select, textarea {
-    font-size: 16px !important; /* prevent iOS zoom */
+    font-size: 16px !important;
   }
 }
 
