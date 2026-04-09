@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  currency     String   @default("VND")
+  language     String   @default("vi")
+  totalBudget  Float    @default(0) @map("total_budget")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  transactions          Transaction[]
+  categories            Category[]
+  budgets               Budget[]
+  savingsItems          SavingsItem[]
+  assetTypes            AssetType[]
+  recurringTransactions RecurringTransaction[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  userId      String  @map("user_id")
+  name        String
+  color       String  @default("#3b82f6")
+  icon        String  @default("Tag")
+  type        String  @default("expense")
+  isDefault   Boolean @default(false) @map("is_default")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  categoryId    String   @map("category_id")
+  amount        Float
+  type          String
+  note          String   @default("")
+  payer         String   @default("")  // người chi tiền
+  paymentMethod String   @default("cash") @map("payment_method") // cash | bank | card
+  date          DateTime @default(now())
+  currency      String   @default("VND")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@index([userId, date])
+  @@index([userId, categoryId])
+  @@map("transactions")
+}
+
+model Budget {
+  id         String @id @default(cuid())
+  userId     String @map("user_id")
+  categoryId String @map("category_id")
+  amount     Float
+  month      Int
+  year       Int
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([userId, categoryId, month, year])
+  @@map("budgets")
+}
+
+model AssetType {
+  id        String  @id @default(cuid())
+  userId    String  @map("user_id")
+  typeKey   String  @map("type_key") // unique key like "CRYPTO", "STOCK"
+  name      String
+  icon      String  @default("Tag")
+  color     String  @default("#8b5cf6")
+  isDefault Boolean @default(false) @map("is_default")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, typeKey])
+  @@map("asset_types")
+}
+
+model SavingsItem {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  type         String    // "CASH" | "SAVINGS_BOOK" | "GOLD"
+  name         String
+  amount       Float     // tiền mặt: số dư, sổ TK: tiền gốc, vàng: tổng giá mua
+  interestRate Float?    @map("interest_rate")  // %/năm
+  startDate    DateTime? @map("start_date")     // ngày gửi
+  maturityDate DateTime? @map("maturity_date")  // ngày đáo hạn
+  termMonths   Int?      @map("term_months")    // kỳ hạn (tháng)
+  goldUnit     Float?    @map("gold_unit")      // số chỉ vàng
+  goldType     String?   @map("gold_type")      // SJC, PNJ, 24K...
+  buyPrice     Float?    @map("buy_price")      // giá mua/chỉ
+  currentPrice Float?   @map("current_price")  // giá hiện tại/chỉ
+  note         String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("savings_items")
+}
+
+model RecurringTransaction {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  categoryId  String   @map("category_id")
+  amount      Float
+  type        String
+  note        String   @default("")
+  frequency   String
+  nextRunDate DateTime @map("next_run_date")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("recurring_transactions")
+}

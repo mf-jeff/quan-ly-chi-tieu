@@ -1,0 +1,293 @@
+@import "tailwindcss";
+
+/* ===== Color System ===== */
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --primary: #1e3a8a;
+  --primary-light: #3b82f6;
+  --accent: #10b981;
+  --accent-light: #34d399;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --muted: #94a3b8;
+  --muted-bg: #f1f5f9;
+  --border: #e2e8f0;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-hover: #1e293b;
+  --sidebar-active: #1e3a8a;
+  --ring: #3b82f6;
+}
+
+.dark {
+  --background: #0b1120;
+  --foreground: #e2e8f0;
+  --card: #162032;
+  --card-foreground: #e2e8f0;
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --accent: #34d399;
+  --accent-light: #6ee7b7;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --muted: #64748b;
+  --muted-bg: #1a2744;
+  --border: #283650;
+  --sidebar: #060d1b;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-hover: #0f172a;
+  --sidebar-active: #1e3a8a;
+  --ring: #60a5fa;
+}
+
+/* ===== Tailwind Theme Bridge ===== */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-muted: var(--muted);
+  --color-muted-bg: var(--muted-bg);
+  --color-border: var(--border);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ===== Base Styles ===== */
+* {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ===== Dark Mode Smooth Transition ===== */
+html.transitioning * {
+  transition-duration: 400ms !important;
+}
+
+/* ===== Focus Styles (Accessibility) ===== */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+  border-color: var(--ring);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ===== Skeleton Loading Animation ===== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--muted-bg) 25%, var(--border) 50%, var(--muted-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ===== Custom Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
+}
+
+/* ===== Card Hover Effect ===== */
+.card-hover {
+  transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  filter: brightness(1.02);
+}
+.dark .card-hover:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.08);
+}
+
+/* ===== Button Ripple + Press ===== */
+button {
+  position: relative;
+  overflow: hidden;
+}
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), var(--ring) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+button:active::after {
+  opacity: 0.1;
+}
+
+/* ===== Interactive Row Hover ===== */
+.row-hover {
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+.row-hover:hover {
+  background-color: var(--muted-bg);
+  box-shadow: inset 3px 0 0 var(--primary-light);
+}
+
+/* ===== Smooth Page Transitions ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 300ms ease-out;
+}
+.animate-fade-in-up {
+  animation: fadeInUp 400ms ease-out;
+}
+.animate-slide-in {
+  animation: slideInRight 300ms ease-out;
+}
+.animate-scale-in {
+  animation: scaleIn 200ms ease-out;
+}
+
+/* ===== Chart Animate ===== */
+.recharts-area-area,
+.recharts-bar-rectangle {
+  animation: chartGrow 800ms ease-out;
+}
+@keyframes chartGrow {
+  from { opacity: 0; transform: scaleY(0); transform-origin: bottom; }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+.recharts-pie-sector {
+  animation: pieReveal 600ms ease-out;
+}
+@keyframes pieReveal {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ===== Spinner ===== */
+@keyframes spin-smooth {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary-light);
+  border-radius: 50%;
+  animation: spin-smooth 0.6s linear infinite;
+}
+
+/* ===== Selection Color ===== */
+::selection {
+  background: var(--primary-light);
+  color: white;
+}
+
+/* ===== Mobile Responsive ===== */
+
+/* Safe area for bottom nav (iPhone notch etc) */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Touch-friendly minimum sizes */
+@media (max-width: 1023px) {
+  button, a, select, input[type="checkbox"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  input, select, textarea {
+    font-size: 16px !important; /* prevent iOS zoom */
+  }
+}
+
+/* Horizontal scroll cards on mobile */
+.scroll-x-mobile {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-x-mobile::-webkit-scrollbar {
+  display: none;
+}
+.scroll-x-mobile > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Mobile-friendly modal */
+@media (max-width: 640px) {
+  .fixed.inset-0 .relative {
+    max-height: 90vh;
+    margin: auto 8px;
+  }
+}
