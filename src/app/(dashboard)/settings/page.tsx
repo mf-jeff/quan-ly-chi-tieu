@@ -10,6 +10,9 @@ import {
   Trash2,
   Users,
   Plus,
+  Pencil,
+  Key,
+  X as XIcon,
   Moon,
   Sun,
   Globe,
@@ -92,7 +95,69 @@ export default function SettingsPage() {
     localStorage.setItem("payer-list", JSON.stringify(list));
   }
 
+  // Profile edit
+  const [editProfile, setEditProfile] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [profileSaving, setProfileSaving] = useState(false);
+
+  // Change password
+  const [showChangePass, setShowChangePass] = useState(false);
+  const [currentPass, setCurrentPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [passSaving, setPassSaving] = useState(false);
+
   const [exportMonth, setExportMonth] = useState(new Date().toISOString().slice(0, 7));
+
+  function openEditProfile() {
+    setEditName(user?.name || "");
+    setEditEmail(user?.email || "");
+    setEditProfile(true);
+  }
+
+  async function saveProfile() {
+    setProfileSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name: editName, email: editEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success("Đã cập nhật thông tin");
+      setEditProfile(false);
+      window.location.reload();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Lỗi");
+    } finally {
+      setProfileSaving(false);
+    }
+  }
+
+  async function changePassword() {
+    if (newPass !== confirmPass) { toast.error("Mật khẩu xác nhận không khớp"); return; }
+    setPassSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: currentPass, newPassword: newPass }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success("Đã đổi mật khẩu");
+      setShowChangePass(false);
+      setCurrentPass(""); setNewPass(""); setConfirmPass("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Lỗi");
+    } finally {
+      setPassSaving(false);
+    }
+  }
 
   async function handleExport(format: "xlsx" | "csv") {
     try {
@@ -115,19 +180,76 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile card */}
-      <div className="bg-card rounded-2xl border border-border p-6">
+      <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white text-2xl font-bold">
             {user?.name?.charAt(0) || "U"}
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-card-foreground">{user?.name || "User"}</h3>
-            <p className="text-sm text-muted">{user?.email || ""}</p>
-          </div>
-          <button onClick={logout} className="flex items-center gap-2 px-4 py-2 text-sm text-danger border border-danger/30 rounded-xl hover:bg-danger/10 transition-colors">
-            <LogOut className="w-4 h-4" />{t("settings.logout")}
-          </button>
+          {editProfile ? (
+            <div className="flex-1 space-y-2">
+              <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Họ tên"
+                className="w-full px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+              <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email"
+                className="w-full px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+              <div className="flex gap-2">
+                <button onClick={saveProfile} disabled={profileSaving}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-accent text-white text-sm rounded-xl hover:bg-accent-light transition-colors disabled:opacity-50">
+                  <Check className="w-3.5 h-3.5" />{profileSaving ? "..." : "Lưu"}
+                </button>
+                <button onClick={() => setEditProfile(false)}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-muted-bg text-muted text-sm rounded-xl hover:text-card-foreground transition-colors">
+                  <XIcon className="w-3.5 h-3.5" />Hủy
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-card-foreground">{user?.name || "User"}</h3>
+              <p className="text-sm text-muted">{user?.email || ""}</p>
+            </div>
+          )}
+          {!editProfile && (
+            <div className="flex items-center gap-2">
+              <button onClick={openEditProfile} className="p-2 text-muted hover:text-primary-light hover:bg-primary-light/10 rounded-xl transition-colors" title="Sửa thông tin">
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button onClick={logout} className="flex items-center gap-2 px-4 py-2 text-sm text-danger border border-danger/30 rounded-xl hover:bg-danger/10 transition-colors">
+                <LogOut className="w-4 h-4" />{t("settings.logout")}
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Change password */}
+        {showChangePass ? (
+          <div className="border-t border-border pt-4 space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Key className="w-4 h-4 text-primary-light" />
+              <span className="text-sm font-semibold text-card-foreground">Đổi mật khẩu</span>
+            </div>
+            <input type="password" value={currentPass} onChange={(e) => setCurrentPass(e.target.value)} placeholder="Mật khẩu hiện tại"
+              className="w-full px-3 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+            <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} placeholder="Mật khẩu mới (tối thiểu 6 ký tự)"
+              className="w-full px-3 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+            <input type="password" value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu mới"
+              className="w-full px-3 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+            <div className="flex gap-2">
+              <button onClick={changePassword} disabled={passSaving || !currentPass || !newPass || !confirmPass}
+                className="flex-1 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary-light transition-colors disabled:opacity-50">
+                {passSaving ? "Đang lưu..." : "Đổi mật khẩu"}
+              </button>
+              <button onClick={() => { setShowChangePass(false); setCurrentPass(""); setNewPass(""); setConfirmPass(""); }}
+                className="px-4 py-2 bg-muted-bg text-muted text-sm rounded-xl hover:text-card-foreground transition-colors">
+                Hủy
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={() => setShowChangePass(true)}
+            className="flex items-center gap-2 w-full border-t border-border pt-4 text-sm text-primary-light hover:text-primary-light/80 transition-colors">
+            <Key className="w-4 h-4" />Đổi mật khẩu
+          </button>
+        )}
       </div>
 
       {/* Preferences */}
