@@ -2,7 +2,7 @@ const BASE = "/api";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("token");
+  return localStorage.getItem("token") || sessionStorage.getItem("token");
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {

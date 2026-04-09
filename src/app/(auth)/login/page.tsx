@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +24,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email, password, rememberMe);
       router.push("/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Đăng nhập thất bại");
@@ -92,6 +93,13 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          {/* Remember me */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 rounded border-border accent-primary-light" />
+            <span className="text-sm text-muted">Ghi nhớ đăng nhập</span>
+          </label>
 
           {/* Error */}
           {error && (
