@@ -37,12 +37,14 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-sidebar rounded-2xl flex items-center justify-center mb-4">
-            <VaultLogo size={40} className="text-warning" />
+        <div className="flex flex-col items-center mb-10">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-10 h-10 bg-sidebar rounded-xl flex items-center justify-center shadow-lg">
+              <VaultLogo size={28} className="text-warning" />
+            </div>
+            <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Vault</h1>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Vault</h1>
-          <p className="text-muted text-sm mt-1">{t("auth.registerTitle")}</p>
+          <p className="text-muted text-sm">{t("auth.registerTitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border p-6 space-y-4">
