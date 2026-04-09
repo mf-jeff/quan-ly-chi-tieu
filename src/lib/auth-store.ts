@@ -13,7 +13,7 @@ interface AuthStore {
   isLoading: boolean;
 
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string, inviteCode?: string) => Promise<void>;
   logout: () => void;
   loadUser: () => Promise<void>;
 }
@@ -29,8 +29,8 @@ export const useAuth = create<AuthStore>((set) => ({
     set({ token, user, isLoading: false });
   },
 
-  register: async (email, password, name) => {
-    const { token, user } = await authApi.register({ email, password, name });
+  register: async (email, password, name, inviteCode) => {
+    const { token, user } = await authApi.register({ email, password, name, inviteCode });
     localStorage.setItem("token", token);
     set({ token, user, isLoading: false });
   },

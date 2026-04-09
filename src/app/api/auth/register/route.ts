@@ -5,7 +5,16 @@ import { seedDefaultCategories } from "@/lib/server/seed-categories";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name } = await req.json();
+    const { email, password, name, inviteCode } = await req.json();
+
+    // Invite code required — only owner can share this code
+    const validCode = process.env.INVITE_CODE || "VAULT2026";
+    if (!inviteCode || inviteCode.trim().toUpperCase() !== validCode.toUpperCase()) {
+      return NextResponse.json(
+        { error: "Mã mời không hợp lệ" },
+        { status: 403 }
+      );
+    }
 
     if (!email || !password || !name) {
       return NextResponse.json(

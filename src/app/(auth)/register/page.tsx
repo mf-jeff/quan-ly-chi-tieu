@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,7 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
     try {
-      await register(email, password, name);
+      await register(email, password, name, inviteCode);
       router.push("/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Đăng ký thất bại");
@@ -95,6 +96,21 @@ export default function RegisterPage() {
               >
                 {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-card-foreground mb-1.5 block">Mã mời</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                placeholder="Nhập mã mời"
+                required
+                className="w-full pl-10 pr-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30 uppercase tracking-widest"
+              />
             </div>
           </div>
 
