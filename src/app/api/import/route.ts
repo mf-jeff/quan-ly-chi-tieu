@@ -150,8 +150,9 @@ export async function POST(req: NextRequest) {
         let paymentMethod = "cash";
         if (cols.payment) {
           const rawPay = String(row[cols.payment] || "").toLowerCase();
-          if (rawPay.includes("chuyển") || rawPay.includes("bank") || rawPay.includes("ck")) paymentMethod = "bank";
+          if (rawPay.includes("chuyển") || rawPay.includes("bank") || rawPay === "ck") paymentMethod = "bank";
           else if (rawPay.includes("thẻ") || rawPay.includes("card")) paymentMethod = "card";
+          else if (rawPay.includes("tiền mặt") || rawPay === "tm" || rawPay.includes("cash")) paymentMethod = "cash";
         }
 
         // Date
