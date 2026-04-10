@@ -85,8 +85,14 @@ export default function TransactionsPage() {
   if (filterType !== "all") params.type = filterType;
   if (filterCategory !== "all") params.categoryId = filterCategory;
   if (search) params.search = search;
-  if (dateRange.startDate) params.startDate = dateRange.startDate;
-  if (dateRange.endDate) params.endDate = dateRange.endDate;
+  if (dateFilter === "all") {
+    // Explicit: no date filter — show all transactions
+    params.startDate = "2000-01-01T00:00:00.000Z";
+    params.endDate = "2099-12-31T23:59:59.000Z";
+  } else if (dateRange.startDate && dateRange.endDate) {
+    params.startDate = dateRange.startDate;
+    params.endDate = dateRange.endDate;
+  }
 
   const { data, isLoading } = useTransactions(params);
   const { data: catData } = useCategories();
