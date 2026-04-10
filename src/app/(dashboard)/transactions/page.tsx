@@ -138,31 +138,31 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="p-4 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-3 sm:p-4 lg:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-primary-light/10 text-primary-light p-3 rounded-xl"><ArrowRightLeft className="w-6 h-6" /></div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="bg-primary-light/10 text-primary-light p-2 sm:p-3 rounded-xl"><ArrowRightLeft className="w-5 h-5 sm:w-6 sm:h-6" /></div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{t("tx.title")}</h1>
-            <p className="text-muted text-sm">{txs.length} {t("transactions").toLowerCase()}</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground">{t("tx.title")}</h1>
+            <p className="text-muted text-xs sm:text-sm">{txs.length} {t("transactions").toLowerCase()}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowCategoryManager(true)} className="flex items-center gap-2 border border-border text-muted px-4 py-2.5 rounded-xl hover:border-primary-light/50 hover:text-primary-light transition-colors text-sm font-medium">
-            <Settings2 className="w-4 h-4" />{t("tx.category")}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <button onClick={() => setShowCategoryManager(true)} className="p-2 sm:px-4 sm:py-2.5 border border-border text-muted rounded-xl hover:text-primary-light transition-colors text-sm" title={t("tx.category")}>
+            <Settings2 className="w-4 h-4" /><span className="hidden sm:inline ml-1">{t("tx.category")}</span>
           </button>
-          <button onClick={() => setShowImport(true)} className="flex items-center gap-2 border border-border text-muted px-4 py-2.5 rounded-xl hover:border-accent/50 hover:text-accent transition-colors text-sm font-medium">
-            <Upload className="w-4 h-4" />Import
+          <button onClick={() => setShowImport(true)} className="p-2 sm:px-4 sm:py-2.5 border border-border text-muted rounded-xl hover:text-accent transition-colors text-sm" title="Import">
+            <Upload className="w-4 h-4" /><span className="hidden sm:inline ml-1">Import</span>
           </button>
-          <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-primary-light transition-colors text-sm font-medium">
-            <Plus className="w-4 h-4" />{t("tx.add")}
+          <button onClick={() => setShowAddModal(true)} className="flex items-center gap-1 bg-primary text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl hover:bg-primary-light transition-colors text-sm font-medium">
+            <Plus className="w-4 h-4" /><span className="hidden sm:inline">{t("tx.add")}</span>
           </button>
         </div>
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <div className="bg-card rounded-2xl border border-border p-4 flex items-center gap-3">
           <div className="bg-accent/10 p-2.5 rounded-xl"><ArrowUpRight className="w-5 h-5 text-accent" /></div>
           <div><p className="text-muted text-xs">{t("tx.totalIncome")}</p><p className="text-lg font-bold text-accent">{formatVND(totalIncome)}</p></div>
@@ -174,32 +174,31 @@ export default function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
-        {/* Search + type + category */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-            <input type="text" placeholder={t("tx.search")} value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted shrink-0" />
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
-              className="bg-muted-bg border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none">
-              <option value="all">{t("tx.all")}</option><option value="income">{t("tx.income")}</option><option value="expense">{t("tx.expense")}</option>
-            </select>
-            <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
-              className="bg-muted-bg border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none">
-              <option value="all">{t("tx.allCategories")}</option>
-              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            <select value={filterPayer} onChange={(e) => setFilterPayer(e.target.value)}
-              className="bg-muted-bg border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none">
-              <option value="all">Tất cả người</option>
-              {payerList.map((p) => <option key={p.name} value={p.name}>{p.name}</option>)}
-              <option value="_empty">Chưa gán người</option>
-            </select>
-          </div>
+      <div className="bg-card rounded-2xl border border-border p-3 sm:p-4 space-y-3">
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+          <input type="text" placeholder={t("tx.search")} value={search} onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+        </div>
+
+        {/* Type + category + payer filters */}
+        <div className="flex gap-2 overflow-x-auto">
+          <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
+            className="bg-muted-bg border border-border rounded-xl px-2 sm:px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none shrink-0">
+            <option value="all">{t("tx.all")}</option><option value="income">{t("tx.income")}</option><option value="expense">{t("tx.expense")}</option>
+          </select>
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
+            className="bg-muted-bg border border-border rounded-xl px-2 sm:px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none shrink-0">
+            <option value="all">{t("tx.allCategories")}</option>
+            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <select value={filterPayer} onChange={(e) => setFilterPayer(e.target.value)}
+            className="bg-muted-bg border border-border rounded-xl px-2 sm:px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none shrink-0">
+            <option value="all">Tất cả người</option>
+            {payerList.map((p) => <option key={p.name} value={p.name}>{p.name}</option>)}
+            <option value="_empty">Chưa gán</option>
+          </select>
         </div>
 
         {/* Date filter */}
@@ -288,54 +287,46 @@ export default function TransactionsPage() {
           const color = tx.category.color;
           const isIncome = tx.type === "income";
           return (
-            <div key={tx.id} className={`flex items-center gap-3 px-4 py-3.5 group transition-all duration-150 ${selected.has(tx.id) ? "bg-primary-light/5" : "hover:bg-muted-bg/60"}`}>
-              <input type="checkbox" checked={selected.has(tx.id)}
-                onChange={(e) => {
-                  const next = new Set(selected);
-                  if (e.target.checked) next.add(tx.id); else next.delete(tx.id);
-                  setSelected(next);
-                }}
-                className="w-4 h-4 rounded border-border accent-primary-light cursor-pointer shrink-0" />
-              {/* Category icon — bigger, border */}
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}30` }}>
-                <Icon className="w-5 h-5" style={{ color }} />
-              </div>
-              {/* Name + note */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-card-foreground truncate">{tx.category.name}</p>
-                {tx.note && <p className="text-xs text-muted mt-0.5 truncate">{tx.note}</p>}
-              </div>
-              {/* Payer badge */}
-              <button onClick={() => setEditTx({ id: tx.id, type: tx.type, categoryId: tx.categoryId, amount: tx.amount, note: tx.note, payer: tx.payer, paymentMethod: tx.paymentMethod, date: tx.date })}
-                className="shrink-0 px-2.5 py-1 text-xs font-semibold rounded-lg cursor-pointer hover:scale-105 transition-transform"
-                style={{ backgroundColor: `${payerColors[tx.payer] || "#94a3b8"}15`, color: payerColors[tx.payer] || "#94a3b8" }}>
-                {tx.payer || "—"}
-              </button>
-              {/* Payment method */}
-              <div className="shrink-0 text-xs text-muted text-center w-14">
-                <span className="bg-muted-bg px-2 py-1 rounded-md">
-                  {tx.paymentMethod === "bank" ? "🏦 CK" : tx.paymentMethod === "card" ? "💳 Thẻ" : "💵 TM"}
-                </span>
-              </div>
-              {/* Date */}
-              <div className="shrink-0 text-xs text-muted text-center w-24">
-                {formatDateVN(tx.date, { day: "2-digit", month: "2-digit", year: "numeric" })}
-              </div>
-              {/* Amount — colored */}
-              <div className="text-right shrink-0 w-28">
-                <span className={`text-sm font-bold tabular-nums ${isIncome ? "text-accent" : "text-danger"}`}>
-                  {isIncome ? "+" : "-"}{formatVND(tx.amount)}
-                </span>
-              </div>
-              {/* Actions */}
-              <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => setEditTx({ id: tx.id, type: tx.type, categoryId: tx.categoryId, amount: tx.amount, note: tx.note, payer: tx.payer, paymentMethod: tx.paymentMethod, date: tx.date })}
-                  className="p-1.5 text-muted hover:text-primary-light hover:bg-primary-light/10 rounded-lg transition-colors">
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button onClick={() => deleteTx.mutate(tx.id)} className="p-1.5 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+            <div key={tx.id} className={`px-3 sm:px-4 py-3 group transition-all duration-150 ${selected.has(tx.id) ? "bg-primary-light/5" : "hover:bg-muted-bg/60"}`}>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <input type="checkbox" checked={selected.has(tx.id)}
+                  onChange={(e) => {
+                    const next = new Set(selected);
+                    if (e.target.checked) next.add(tx.id); else next.delete(tx.id);
+                    setSelected(next);
+                  }}
+                  className="w-4 h-4 rounded border-border accent-primary-light cursor-pointer shrink-0" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}30` }}>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-card-foreground truncate">{tx.category.name}</p>
+                    <button onClick={() => setEditTx({ id: tx.id, type: tx.type, categoryId: tx.categoryId, amount: tx.amount, note: tx.note, payer: tx.payer, paymentMethod: tx.paymentMethod, date: tx.date })}
+                      className="shrink-0 px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold rounded-md"
+                      style={{ backgroundColor: `${payerColors[tx.payer] || "#94a3b8"}15`, color: payerColors[tx.payer] || "#94a3b8" }}>
+                      {tx.payer || "—"}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted mt-0.5 truncate">
+                    {tx.note && <>{tx.note} · </>}
+                    {tx.paymentMethod === "bank" ? "CK" : tx.paymentMethod === "card" ? "Thẻ" : "TM"} · {formatDateVN(tx.date, { day: "2-digit", month: "2-digit" })}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className={`text-sm font-bold tabular-nums ${isIncome ? "text-accent" : "text-danger"}`}>
+                    {isIncome ? "+" : "-"}{formatVND(tx.amount)}
+                  </span>
+                </div>
+                <div className="hidden sm:flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => setEditTx({ id: tx.id, type: tx.type, categoryId: tx.categoryId, amount: tx.amount, note: tx.note, payer: tx.payer, paymentMethod: tx.paymentMethod, date: tx.date })}
+                    className="p-1.5 text-muted hover:text-primary-light hover:bg-primary-light/10 rounded-lg transition-colors">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => deleteTx.mutate(tx.id)} className="p-1.5 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           );
