@@ -2,7 +2,7 @@
 
 import { useTransactions } from "@/lib/hooks";
 import { getIcon } from "@/lib/icon-map";
-import { formatVND, formatDateVN } from "@/lib/utils";
+import { formatVND, formatDateShort } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
 export default function RecentTransactions() {
@@ -32,7 +32,7 @@ export default function RecentTransactions() {
                 {tx.note && <p className="text-xs text-muted truncate">{tx.note}</p>}
               </div>
               <span className="text-xs text-muted shrink-0">
-                {formatDateVN(tx.date, { day: "2-digit", month: "2-digit" })}
+                {formatDateShort(tx.date)}
               </span>
               <span className={`text-sm font-semibold whitespace-nowrap shrink-0 ${isIncome ? "text-accent" : "text-danger"}`}>
                 {isIncome ? "+" : "-"}{formatVND(tx.amount)}

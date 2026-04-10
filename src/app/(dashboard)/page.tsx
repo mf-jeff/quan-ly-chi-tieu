@@ -24,9 +24,11 @@ function VNClock() {
       setTime(
         now.toLocaleTimeString("vi-VN", { timeZone: VN_TIMEZONE, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })
       );
-      setDateStr(
-        now.toLocaleDateString("vi-VN", { timeZone: VN_TIMEZONE, weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" })
-      );
+      const vnNow = new Date(now.toLocaleString("en-US", { timeZone: VN_TIMEZONE }));
+      const days = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+      const dd = String(vnNow.getDate()).padStart(2, "0");
+      const mm = String(vnNow.getMonth() + 1).padStart(2, "0");
+      setDateStr(`${days[vnNow.getDay()]}, ${dd}/${mm}/${vnNow.getFullYear()}`);
     }
     tick();
     const id = setInterval(tick, 1000);

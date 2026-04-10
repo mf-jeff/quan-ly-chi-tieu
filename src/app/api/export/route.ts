@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   });
 
   const data = transactions.map((tx) => ({
-    "Ngày": new Date(tx.date).toLocaleDateString("vi-VN"),
+    "Ngày": (() => { const d = new Date(tx.date); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`; })(),
     "Loại": tx.type === "income" ? "Thu nhập" : "Chi tiêu",
     "Danh mục": tx.category.name,
     "Số tiền": tx.amount,

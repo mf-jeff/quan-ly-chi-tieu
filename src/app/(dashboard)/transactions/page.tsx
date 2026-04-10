@@ -6,7 +6,7 @@ import { ListSkeleton } from "@/components/ui/Skeleton";
 import { useTransactions, useDeleteTransaction, useCategories } from "@/lib/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { getIcon } from "@/lib/icon-map";
-import { formatVND, formatDateVN } from "@/lib/utils";
+import { formatVND, formatDateVN, formatDateShort } from "@/lib/utils";
 import { getToken } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
@@ -344,7 +344,7 @@ export default function TransactionsPage() {
                   </span>
                 </div>
                 <div className="w-24 text-center text-xs text-muted">
-                  {formatDateVN(tx.date, { day: "2-digit", month: "2-digit", year: "numeric" })}
+                  {formatDateVN(tx.date)}
                 </div>
                 <div className="w-28 text-right">
                   <span className={`text-sm font-bold tabular-nums ${isIncome ? "text-accent" : "text-danger"}`}>
@@ -382,7 +382,7 @@ export default function TransactionsPage() {
                     {tx.note && <span>·</span>}
                     <span>{tx.paymentMethod === "bank" ? "CK" : tx.paymentMethod === "card" ? "Thẻ" : "TM"}</span>
                     <span>·</span>
-                    <span>{formatDateVN(tx.date, { day: "2-digit", month: "2-digit" })}</span>
+                    <span>{formatDateShort(tx.date)}</span>
                   </div>
                 </div>
                 <span className={`text-sm font-bold tabular-nums shrink-0 ${isIncome ? "text-accent" : "text-danger"}`}>

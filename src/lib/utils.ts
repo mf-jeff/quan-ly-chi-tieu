@@ -8,21 +8,32 @@ export function nowVN(): Date {
 }
 
 export function formatDateVN(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
-  return new Intl.DateTimeFormat("vi-VN", {
-    timeZone: VN_TIMEZONE,
-    ...options,
-  }).format(new Date(date));
+  if (options) {
+    return new Intl.DateTimeFormat("vi-VN", { timeZone: VN_TIMEZONE, ...options }).format(new Date(date));
+  }
+  // Default: DD/MM/YYYY
+  const d = new Date(new Date(date).toLocaleString("en-US", { timeZone: VN_TIMEZONE }));
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+export function formatDateShort(date: Date | string): string {
+  const d = new Date(new Date(date).toLocaleString("en-US", { timeZone: VN_TIMEZONE }));
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}`;
 }
 
 export function formatDateTimeVN(date: Date | string): string {
-  return formatDateVN(date, {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  const d = new Date(new Date(date).toLocaleString("en-US", { timeZone: VN_TIMEZONE }));
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
 }
 
 export function toVNISOString(date: Date): string {
