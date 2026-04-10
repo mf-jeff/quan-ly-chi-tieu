@@ -295,7 +295,19 @@ export default function TransactionsPage() {
       )}
 
       {/* Transaction list */}
-      <div className="bg-card rounded-2xl border border-border divide-y divide-border">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        {/* Table header — desktop only */}
+        <div className="hidden sm:flex items-center gap-3 px-4 py-2.5 border-b border-border text-xs font-medium text-muted bg-muted-bg/50">
+          <div className="w-4" />
+          <div className="w-10" />
+          <div className="flex-1">Danh mục</div>
+          <div className="w-20 text-center">Người</div>
+          <div className="w-16 text-center">Thanh toán</div>
+          <div className="w-24 text-center">Ngày</div>
+          <div className="w-28 text-right">Số tiền</div>
+          <div className="w-16" />
+        </div>
+
         {isLoading ? (
           <ListSkeleton rows={6} />
         ) : txs.length === 0 ? (
@@ -304,47 +316,78 @@ export default function TransactionsPage() {
           const Icon = getIcon(tx.category.icon);
           const color = tx.category.color;
           const isIncome = tx.type === "income";
+          const editData = { id: tx.id, type: tx.type, categoryId: tx.categoryId, amount: tx.amount, note: tx.note, payer: tx.payer, paymentMethod: tx.paymentMethod, date: tx.date };
           return (
-            <div key={tx.id} className={`px-3 sm:px-4 py-3 group transition-all duration-150 ${selected.has(tx.id) ? "bg-primary-light/5" : "hover:bg-muted-bg/60"}`}>
-              <div className="flex items-center gap-2 sm:gap-3">
+            <div key={tx.id} className={`border-b border-border last:border-0 px-3 sm:px-4 py-2.5 sm:py-3 group transition-all duration-150 ${selected.has(tx.id) ? "bg-primary-light/5" : "hover:bg-muted-bg/60"}`}>
+              {/* Desktop row */}
+              <div className="hidden sm:flex items-center gap-3">
                 <input type="checkbox" checked={selected.has(tx.id)}
-                  onChange={(e) => {
-                    const next = new Set(selected);
-                    if (e.target.checked) next.add(tx.id); else next.delete(tx.id);
-                    setSelected(next);
-                  }}
+                  onChange={(e) => { const next = new Set(selected); if (e.target.checked) next.add(tx.id); else next.delete(tx.id); setSelected(next); }}
                   className="w-4 h-4 rounded border-border accent-primary-light cursor-pointer shrink-0" />
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}30` }}>
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color }} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}30` }}>
+                  <Icon className="w-5 h-5" style={{ color }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-card-foreground truncate">{tx.category.name}</p>
-                    <button onClick={() => setEditTx({ id: tx.id, type: tx.type, categoryId: tx.categoryId, amount: tx.amount, note: tx.note, payer: tx.payer, paymentMethod: tx.paymentMethod, date: tx.date })}
-                      className="shrink-0 px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold rounded-md"
-                      style={{ backgroundColor: `${payerColors[tx.payer] || "#94a3b8"}15`, color: payerColors[tx.payer] || "#94a3b8" }}>
-                      {tx.payer || "—"}
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted mt-0.5 truncate">
-                    {tx.note && <>{tx.note} · </>}
-                    {tx.paymentMethod === "bank" ? "CK" : tx.paymentMethod === "card" ? "Thẻ" : "TM"} · {formatDateVN(tx.date, { day: "2-digit", month: "2-digit" })}
-                  </p>
+                  <p className="text-sm font-semibold text-card-foreground truncate">{tx.category.name}</p>
+                  {tx.note && <p className="text-xs text-muted truncate">{tx.note}</p>}
                 </div>
-                <div className="text-right shrink-0">
+                <div className="w-20 text-center">
+                  <button onClick={() => setEditTx(editData)}
+                    className="px-2 py-0.5 text-xs font-semibold rounded-md"
+                    style={{ backgroundColor: `${payerColors[tx.payer] || "#94a3b8"}15`, color: payerColors[tx.payer] || "#94a3b8" }}>
+                    {tx.payer || "—"}
+                  </button>
+                </div>
+                <div className="w-16 text-center text-xs text-muted">
+                  <span className="bg-muted-bg px-2 py-1 rounded-md">
+                    {tx.paymentMethod === "bank" ? "🏦 CK" : tx.paymentMethod === "card" ? "💳 Thẻ" : "💵 TM"}
+                  </span>
+                </div>
+                <div className="w-24 text-center text-xs text-muted">
+                  {formatDateVN(tx.date, { day: "2-digit", month: "2-digit", year: "numeric" })}
+                </div>
+                <div className="w-28 text-right">
                   <span className={`text-sm font-bold tabular-nums ${isIncome ? "text-accent" : "text-danger"}`}>
                     {isIncome ? "+" : "-"}{formatVND(tx.amount)}
                   </span>
                 </div>
-                <div className="hidden sm:flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => setEditTx({ id: tx.id, type: tx.type, categoryId: tx.categoryId, amount: tx.amount, note: tx.note, payer: tx.payer, paymentMethod: tx.paymentMethod, date: tx.date })}
-                    className="p-1.5 text-muted hover:text-primary-light hover:bg-primary-light/10 rounded-lg transition-colors">
+                <div className="w-16 flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => setEditTx(editData)} className="p-1.5 text-muted hover:text-primary-light hover:bg-primary-light/10 rounded-lg transition-colors">
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button onClick={() => deleteTx.mutate(tx.id)} className="p-1.5 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
+              </div>
+
+              {/* Mobile row */}
+              <div className="flex sm:hidden items-center gap-2">
+                <input type="checkbox" checked={selected.has(tx.id)}
+                  onChange={(e) => { const next = new Set(selected); if (e.target.checked) next.add(tx.id); else next.delete(tx.id); setSelected(next); }}
+                  className="w-4 h-4 rounded border-border accent-primary-light cursor-pointer shrink-0" />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}30` }}>
+                  <Icon className="w-4 h-4" style={{ color }} />
+                </div>
+                <div className="flex-1 min-w-0" onClick={() => setEditTx(editData)}>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-semibold text-card-foreground truncate">{tx.category.name}</p>
+                    <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded-md shrink-0"
+                      style={{ backgroundColor: `${payerColors[tx.payer] || "#94a3b8"}15`, color: payerColors[tx.payer] || "#94a3b8" }}>
+                      {tx.payer || "—"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px] text-muted mt-0.5">
+                    {tx.note && <span className="truncate max-w-[120px]">{tx.note}</span>}
+                    {tx.note && <span>·</span>}
+                    <span>{tx.paymentMethod === "bank" ? "CK" : tx.paymentMethod === "card" ? "Thẻ" : "TM"}</span>
+                    <span>·</span>
+                    <span>{formatDateVN(tx.date, { day: "2-digit", month: "2-digit" })}</span>
+                  </div>
+                </div>
+                <span className={`text-sm font-bold tabular-nums shrink-0 ${isIncome ? "text-accent" : "text-danger"}`}>
+                  {isIncome ? "+" : "-"}{formatVND(tx.amount)}
+                </span>
               </div>
             </div>
           );
