@@ -78,7 +78,13 @@ export default function EditTransactionModal({ open, onClose, data }: Props) {
     e.preventDefault();
     if (!data) return;
     setError("");
-    const parsedAmount = Number(amount);
+    let parsedAmount = Number(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      try {
+        const expr = amount.replace(/[^0-9+\-*/().]/g, "");
+        parsedAmount = expr ? Function(`"use strict"; return (${expr})`)() : 0;
+      } catch { parsedAmount = 0; }
+    }
     if (!parsedAmount || parsedAmount <= 0) { setError(t("addTx.error.amount")); return; }
     if (!categoryId) { setError(t("addTx.error.category")); return; }
 
@@ -130,9 +136,21 @@ export default function EditTransactionModal({ open, onClose, data }: Props) {
           {/* Amount */}
           <div>
             <label className="text-sm font-medium text-card-foreground mb-2 block">{t("addTx.amount")}</label>
-            <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" min="0"
+            <input type="text" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)}
+              placeholder="VD: 50000 hoặc 70+17+40"
               className="w-full px-4 py-3 bg-muted-bg border border-border rounded-xl text-lg font-semibold text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
-            {amount && Number(amount) > 0 && <p className="text-xs text-muted mt-1">{formatVND(Number(amount))}</p>}
+            {amount && (() => {
+              try {
+                const expr = amount.replace(/[^0-9+\-*/().]/g, "");
+                const result = expr ? Function(`"use strict"; return (${expr})`)() : 0;
+                if (typeof result === "number" && result > 0 && !isNaN(result)) {
+                  return <p className="text-xs text-accent mt-1">= {formatVND(result)}</p>;
+                }
+              } catch { /* invalid */ }
+              return amount && !isNaN(Number(amount)) && Number(amount) > 0
+                ? <p className="text-xs text-muted mt-1">{formatVND(Number(amount))}</p>
+                : null;
+            })()}
           </div>
 
           {/* Category */}
