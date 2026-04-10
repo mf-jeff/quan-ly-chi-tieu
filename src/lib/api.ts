@@ -66,6 +66,7 @@ export const transactionApi = {
         category: { id: string; name: string; color: string; icon: string };
       }>;
       pagination: { page: number; limit: number; total: number; totalPages: number };
+      totals: { income: number; expense: number };
     }>(`/transactions${qs}`);
   },
   create: (data: { amount: number; type: string; categoryId: string; note?: string; payer?: string; paymentMethod?: string; date?: string }) =>

@@ -8,8 +8,8 @@ export async function GET(req: NextRequest) {
 
   const url = new URL(req.url);
   const page = Number(url.searchParams.get("page")) || 1;
-  const limit = Number(url.searchParams.get("limit")) || 1000;
-  const type = url.searchParams.get("type"); // income | expense
+  const limit = Number(url.searchParams.get("limit")) || 50;
+  const type = url.searchParams.get("type");
   const categoryId = url.searchParams.get("categoryId");
   const search = url.searchParams.get("search");
   const startDate = url.searchParams.get("startDate");
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     if (endDate) (where.date as Record<string, unknown>).lte = new Date(endDate);
   }
 
-  const [transactions, total] = await Promise.all([
+  const [transactions, total, totals] = await Promise.all([
     prisma.transaction.findMany({
       where,
       include: { category: true },
@@ -34,11 +34,20 @@ export async function GET(req: NextRequest) {
       take: limit,
     }),
     prisma.transaction.count({ where }),
+    prisma.transaction.groupBy({
+      by: ["type"],
+      where,
+      _sum: { amount: true },
+    }),
   ]);
+
+  const totalIncome = totals.find((t) => t.type === "income")?._sum.amount || 0;
+  const totalExpense = totals.find((t) => t.type === "expense")?._sum.amount || 0;
 
   return NextResponse.json({
     transactions,
     pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    totals: { income: totalIncome, expense: totalExpense },
   });
 }
 
@@ -50,10 +59,7 @@ export async function POST(req: NextRequest) {
     const { amount, type, categoryId, note, date, currency, payer, paymentMethod } = await req.json();
 
     if (!amount || !type || !categoryId) {
-      return NextResponse.json(
-        { error: "Số tiền, loại và danh mục là bắt buộc" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Số tiền, loại và danh mục là bắt buộc" }, { status: 400 });
     }
 
     const transaction = await prisma.transaction.create({

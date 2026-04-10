@@ -69,6 +69,7 @@ export default function TransactionsPage() {
   }, [payerList]);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [editTx, setEditTx] = useState<{ id: string; type: string; categoryId: string; amount: number; note: string; payer: string; paymentMethod: string; date: string } | null>(null);
@@ -86,19 +87,22 @@ export default function TransactionsPage() {
   if (filterCategory !== "all") params.categoryId = filterCategory;
   if (search) params.search = search;
   if (dateFilter === "all") {
-    // Explicit: no date filter — show all transactions
     params.startDate = "2000-01-01T00:00:00.000Z";
     params.endDate = "2099-12-31T23:59:59.000Z";
   } else if (dateRange.startDate && dateRange.endDate) {
     params.startDate = dateRange.startDate;
     params.endDate = dateRange.endDate;
   }
+  params.page = page.toString();
+  params.limit = "50";
 
   const { data, isLoading } = useTransactions(params);
   const { data: catData } = useCategories();
   const deleteTx = useDeleteTransaction();
 
   const allTxs = data?.transactions || [];
+  const pagination = data?.pagination || { page: 1, limit: 50, total: 0, totalPages: 1 };
+  const serverTotals = data?.totals || { income: 0, expense: 0 };
   const categories = catData?.categories || [];
 
   // Client-side filter by payer
@@ -106,12 +110,13 @@ export default function TransactionsPage() {
     : filterPayer === "_empty" ? allTxs.filter((tx) => !tx.payer)
     : allTxs.filter((tx) => tx.payer === filterPayer);
 
-  const totalIncome = txs.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const totalExpense = txs.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  const totalIncome = serverTotals.income;
+  const totalExpense = serverTotals.expense;
 
   // Set default date value when switching filter mode
   function handleDateFilterChange(mode: DateFilter) {
     setDateFilter(mode);
+    setPage(1);
     if (mode === "day") setDateValue(new Date().toISOString().slice(0, 10));
     else if (mode === "month") setDateValue(new Date().toISOString().slice(0, 7));
     else if (mode === "year") setDateValue(new Date().getFullYear().toString());
@@ -340,6 +345,34 @@ export default function TransactionsPage() {
           );
         })}
       </div>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between bg-card rounded-2xl border border-border px-4 py-3">
+          <p className="text-sm text-muted">
+            {pagination.total} giao dịch · Trang {pagination.page}/{pagination.totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1}
+              className="px-3 py-1.5 text-sm border border-border rounded-lg text-muted hover:text-card-foreground disabled:opacity-30 transition-colors">
+              ← Trước
+            </button>
+            {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+              const p = i + 1;
+              return (
+                <button key={p} onClick={() => setPage(p)}
+                  className={`w-8 h-8 text-sm rounded-lg transition-colors ${page === p ? "bg-primary text-white" : "text-muted hover:bg-muted-bg"}`}>
+                  {p}
+                </button>
+              );
+            })}
+            <button onClick={() => setPage(Math.min(pagination.totalPages, page + 1))} disabled={page >= pagination.totalPages}
+              className="px-3 py-1.5 text-sm border border-border rounded-lg text-muted hover:text-card-foreground disabled:opacity-30 transition-colors">
+              Sau →
+            </button>
+          </div>
+        </div>
+      )}
 
       <AddTransactionModal open={showAddModal} onClose={() => { setShowAddModal(false); loadPayers(); }} />
       <EditTransactionModal open={!!editTx} onClose={() => { setEditTx(null); loadPayers(); }} data={editTx} />

@@ -9,8 +9,6 @@ import { toast } from "sonner";
 
 export function useTransactions(params?: Record<string, string>) {
   const { startDate, endDate } = useDateStore();
-  // If params already has startDate/endDate, use those (page-level filter)
-  // Otherwise use the global date store (dashboard-level filter)
   const finalParams = {
     ...(params?.startDate ? {} : { startDate: startDate.toISOString(), endDate: endDate.toISOString() }),
     ...params,
