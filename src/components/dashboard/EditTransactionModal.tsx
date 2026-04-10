@@ -220,8 +220,12 @@ export default function EditTransactionModal({ open, onClose, data }: Props) {
           {/* Date */}
           <div>
             <label className="text-sm font-medium text-card-foreground mb-2 block">{t("addTx.date")}</label>
-            <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)}
-              className="w-full px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+            <div className="flex gap-2">
+              <input type="date" value={date.slice(0, 10)} onChange={(e) => setDate(e.target.value + date.slice(10))}
+                className="flex-1 px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+              <input type="time" value={date.slice(11, 16)} onChange={(e) => setDate(date.slice(0, 11) + e.target.value)}
+                className="w-28 px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+            </div>
           </div>
 
           {error && <p className="text-sm text-danger bg-danger/10 px-4 py-2 rounded-xl">{error}</p>}

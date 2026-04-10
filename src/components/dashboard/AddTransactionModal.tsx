@@ -40,7 +40,8 @@ export default function AddTransactionModal({ open, onClose }: Props) {
       }
     } catch { /* empty */ }
   }, [open]);
-  const [date, setDate] = useState(toVNISOString(new Date()));
+  const [dateVal, setDateVal] = useState(() => { const d = toVNISOString(new Date()); return d.slice(0, 10); });
+  const [timeVal, setTimeVal] = useState(() => { const d = toVNISOString(new Date()); return d.slice(11, 16); });
   const [error, setError] = useState("");
 
   const filtered = categories.filter((c) => c.type === type || c.type === "both");
@@ -61,10 +62,10 @@ export default function AddTransactionModal({ open, onClose }: Props) {
     if (!payer) { setError("Vui lòng chọn người"); return; }
 
     addTx.mutate(
-      { amount: parsedAmount, type, categoryId, note: note.trim(), payer: payer.trim(), paymentMethod, date: new Date(date).toISOString() },
+      { amount: parsedAmount, type, categoryId, note: note.trim(), payer: payer.trim(), paymentMethod, date: new Date(`${dateVal}T${timeVal}`).toISOString() },
       {
         onSuccess: () => {
-          setType("expense"); setCategoryId(""); setAmount(""); setNote(""); setPayer(""); setPaymentMethod("cash"); setDate(toVNISOString(new Date()));
+          setType("expense"); setCategoryId(""); setAmount(""); setNote(""); setPayer(""); setPaymentMethod("cash"); setDateVal(toVNISOString(new Date()).slice(0,10)); setTimeVal(toVNISOString(new Date()).slice(11,16));
           onClose();
         },
       }
@@ -175,8 +176,12 @@ export default function AddTransactionModal({ open, onClose }: Props) {
 
           <div>
             <label className="text-sm font-medium text-card-foreground mb-2 block">{t("addTx.date")}</label>
-            <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)}
-              className="w-full px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+            <div className="flex gap-2">
+              <input type="date" value={dateVal} onChange={(e) => setDateVal(e.target.value)}
+                className="flex-1 px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+              <input type="time" value={timeVal} onChange={(e) => setTimeVal(e.target.value)}
+                className="w-28 px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
+            </div>
           </div>
 
           {error && <p className="text-sm text-danger bg-danger/10 px-4 py-2 rounded-xl">{error}</p>}
