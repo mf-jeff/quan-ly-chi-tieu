@@ -267,9 +267,11 @@ export default function TransactionsPage() {
               onClick={async () => {
                 if (!confirm(`Xóa ${selected.size} giao dịch? Không thể hoàn tác!`)) return;
                 const token = getToken();
-                for (const id of selected) {
-                  await fetch(`/api/transactions/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-                }
+                await fetch("/api/transactions/batch-delete", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                  body: JSON.stringify({ ids: Array.from(selected) }),
+                });
                 setSelected(new Set());
                 qc.invalidateQueries({ queryKey: ["transactions"] });
                 qc.invalidateQueries({ queryKey: ["budgets"] });
