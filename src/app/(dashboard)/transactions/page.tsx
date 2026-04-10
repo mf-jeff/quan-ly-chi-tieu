@@ -277,10 +277,15 @@ export default function TransactionsPage() {
                   headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                   body: JSON.stringify({ ids: Array.from(selected) }),
                 });
+                const count = selected.size;
                 setSelected(new Set());
-                qc.invalidateQueries({ queryKey: ["transactions"] });
+                await qc.invalidateQueries({ queryKey: ["transactions"] });
                 qc.invalidateQueries({ queryKey: ["budgets"] });
-                toast.success(`Đã xóa ${selected.size} giao dịch`);
+                // If current page is now empty, go back
+                const remaining = pagination.total - count;
+                const maxPage = Math.max(1, Math.ceil(remaining / 50));
+                if (page > maxPage) setPage(maxPage);
+                toast.success(`Đã xóa ${count} giao dịch`);
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-danger border border-danger/30 rounded-xl hover:bg-danger/10 transition-colors">
               <Trash2 className="w-3.5 h-3.5" /> Xóa {selected.size}
