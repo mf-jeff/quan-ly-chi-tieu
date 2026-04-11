@@ -91,6 +91,12 @@ export async function POST(req: NextRequest) {
     const headers = Object.keys(rows[0]);
     const cols = detectColumns(headers);
 
+    // Debug: log first row raw values to see what XLSX returns
+    const dateCol = cols.date;
+    if (dateCol && rows[0]) {
+      console.log("DEBUG date col:", dateCol, "value:", rows[0][dateCol], "type:", typeof rows[0][dateCol]);
+    }
+
     if (!cols.amount) {
       return NextResponse.json({ error: `Không tìm thấy cột số tiền. Các cột: ${headers.join(", ")}` }, { status: 400 });
     }
@@ -211,6 +217,7 @@ export async function POST(req: NextRequest) {
       categoriesCreated,
       newCategories: newCategoryNames,
       total: rows.length,
+      _debug: { dateCol: cols.date, firstDateRaw: cols.date && rows[0] ? String(rows[0][cols.date]) : null, firstDateType: cols.date && rows[0] ? typeof rows[0][cols.date] : null },
       errors: errors.slice(0, 10),
     });
   } catch (e) {
