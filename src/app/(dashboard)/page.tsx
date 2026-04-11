@@ -59,7 +59,15 @@ export default function Dashboard() {
               {t("hello")} {user?.name || "bạn"}!
             </h1>
             <p className="text-muted text-sm mt-0.5">
-              {t("dashboard.subtitle")}
+              {(() => {
+                const h = new Date(new Date().toLocaleString("en-US", { timeZone: VN_TIMEZONE })).getHours();
+                if (h < 6) return "Khuya rồi, nghỉ ngơi sớm nhé!";
+                if (h < 11) return "Chúc bạn buổi sáng tốt lành!";
+                if (h < 13) return "Chúc bạn buổi trưa vui vẻ!";
+                if (h < 18) return "Chúc bạn buổi chiều năng suất!";
+                if (h < 22) return "Chúc bạn buổi tối thư giãn!";
+                return "Khuya rồi, nghỉ ngơi sớm nhé!";
+              })()}
             </p>
           </div>
           <div className="flex items-center gap-2">
