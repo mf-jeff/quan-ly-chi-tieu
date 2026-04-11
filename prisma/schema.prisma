@@ -127,7 +127,8 @@ model Loan {
   type         String    @default("lend") // "lend" = cho vay, "borrow" = đi vay
   lender       String    // người cho vay
   borrower     String    // người vay
-  amount       Float     // số tiền
+  amount       Float     // số tiền gốc
+  paidAmount   Float     @default(0) @map("paid_amount") // đã trả
   interestRate Float?    @map("interest_rate") // lãi suất %/năm
   date         DateTime  @default(now()) // ngày cho vay
   dueDate      DateTime? @map("due_date") // ngày trả

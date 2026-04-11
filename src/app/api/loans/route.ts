@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
   });
 
-  const totalLent = loans.filter((l) => !l.isPaid).reduce((s, l) => s + l.amount, 0);
+  const totalLent = loans.filter((l) => !l.isPaid).reduce((s, l) => s + (l.amount - l.paidAmount), 0);
   const totalPaid = loans.filter((l) => l.isPaid).reduce((s, l) => s + l.amount, 0);
 
   return NextResponse.json({ loans, totalLent, totalPaid });

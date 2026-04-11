@@ -22,6 +22,7 @@ export async function PUT(
       lender: body.lender,
       borrower: body.borrower,
       amount: body.amount !== undefined ? Number(body.amount) : undefined,
+      paidAmount: body.paidAmount !== undefined ? Number(body.paidAmount) : undefined,
       interestRate: body.interestRate !== undefined ? (body.interestRate ? Number(body.interestRate) : null) : undefined,
       dueDate: body.dueDate !== undefined ? (body.dueDate ? new Date(body.dueDate) : null) : undefined,
       isPaid: body.isPaid,
