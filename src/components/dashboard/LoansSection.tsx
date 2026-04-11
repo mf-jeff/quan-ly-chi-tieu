@@ -84,7 +84,7 @@ function LoanBlock({ type, icon: Icon, color, title, loans, totalUnpaid }: {
   const [expanded, setExpanded] = useState(false);
   const [expandedPerson, setExpandedPerson] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [editData, setEditData] = useState<LoanData | null>(null);
+  const [editingLoanId, setEditingLoanId] = useState<string | null>(null);
   const [payingLoanId, setPayingLoanId] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState("");
   const [editPaidId, setEditPaidId] = useState<string | null>(null);
@@ -249,10 +249,18 @@ function LoanBlock({ type, icon: Icon, color, title, loans, totalUnpaid }: {
                                 <div className="flex items-center gap-0.5 ml-2 shrink-0">
                                   {!loan.isPaid && <button onClick={() => { setPayingLoanId(payingLoanId === loan.id ? null : loan.id); setPayAmount(""); setEditPaidId(null); }} className="p-1 text-muted hover:text-accent rounded text-[10px]" title="Ghi nhận trả tiền">💰</button>}
                                   {!loan.isPaid && <button onClick={() => updateLoan.mutate({ id: loan.id, data: { paidAmount: loan.amount, isPaid: true } })} className="p-1 text-muted hover:text-accent rounded" title="Trả hết"><CheckCircle2 className="w-3.5 h-3.5" /></button>}
-                                  <button onClick={() => { setEditData(loan); setShowAdd(true); }} className="p-1 text-muted hover:text-primary-light rounded" title="Sửa khoản vay"><Pencil className="w-3 h-3" /></button>
+                                  <button onClick={() => setEditingLoanId(editingLoanId === loan.id ? null : loan.id)} className="p-1 text-muted hover:text-primary-light rounded" title="Sửa khoản vay"><Pencil className="w-3 h-3" /></button>
                                   <button onClick={() => { if (confirm("Xóa khoản vay này?")) deleteLoan.mutate(loan.id); }} className="p-1 text-muted hover:text-danger rounded" title="Xóa"><Trash2 className="w-3 h-3" /></button>
                                 </div>
                               </div>
+                              {/* Inline edit form */}
+                              {editingLoanId === loan.id && (
+                                <LoanForm type={type} editData={loan} isPending={updateLoan.isPending}
+                                  onSubmit={(data) => {
+                                    updateLoan.mutate({ id: loan.id, data }, { onSuccess: () => setEditingLoanId(null) });
+                                  }}
+                                  onCancel={() => setEditingLoanId(null)} />
+                              )}
                             </div>
                           );
                         })}
@@ -266,17 +274,13 @@ function LoanBlock({ type, icon: Icon, color, title, loans, totalUnpaid }: {
 
           {/* Add form */}
           {showAdd ? (
-            <LoanForm type={type} editData={editData} isPending={addLoan.isPending || updateLoan.isPending}
+            <LoanForm type={type} isPending={addLoan.isPending}
               onSubmit={(data) => {
-                if (editData) {
-                  updateLoan.mutate({ id: editData.id, data }, { onSuccess: () => { setShowAdd(false); setEditData(null); } });
-                } else {
-                  addLoan.mutate(data, { onSuccess: () => setShowAdd(false) });
-                }
+                addLoan.mutate(data, { onSuccess: () => setShowAdd(false) });
               }}
-              onCancel={() => { setShowAdd(false); setEditData(null); }} />
+              onCancel={() => setShowAdd(false)} />
           ) : (
-            <button onClick={() => { setEditData(null); setShowAdd(true); }}
+            <button onClick={() => setShowAdd(true)}
               className={`flex items-center gap-2 w-full p-2.5 rounded-xl border border-dashed border-border text-muted hover:${color} transition-colors text-sm`}>
               <Plus className="w-4 h-4" /> Thêm {type === "lend" ? "khoản cho vay" : "khoản vay"}
             </button>
