@@ -6,26 +6,27 @@ import * as XLSX from "xlsx";
 function parseDate(raw: unknown): Date {
   if (!raw) return new Date();
 
-  // Excel serial number
-  if (typeof raw === "number") {
-    // Excel serial date → JS date
-    // Note: XLSX library may auto-parse dates — the serial could be in US format
-    const d = new Date((raw - 25569) * 86400 * 1000);
-    // Validate reasonable date
-    if (d.getFullYear() >= 2000 && d.getFullYear() <= 2100) return d;
+  // If XLSX returned a Date object (cellDates: true)
+  if (raw instanceof Date) {
+    if (!isNaN(raw.getTime())) return raw;
     return new Date();
   }
 
   const str = String(raw).trim();
 
-  // DD/MM/YYYY or D/M/YYYY (Vietnamese format — day first)
-  const dmy = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
+  // DD/MM/YYYY or D/M/YYYY — ALWAYS assume Vietnamese format (day first)
+  const dmy = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$/);
   if (dmy) {
-    const day = Number(dmy[1]);
-    const month = Number(dmy[2]);
-    const year = Number(dmy[3]);
-    // If day > 12, it's definitely DD/MM (can't be month)
-    // If both <= 12, assume DD/MM (Vietnamese convention)
+    let day = Number(dmy[1]);
+    let month = Number(dmy[2]);
+    let year = Number(dmy[3]);
+    if (year < 100) year += 2000;
+
+    // Sanity check: if month > 12, swap day and month (user might have MM/DD)
+    if (month > 12 && day <= 12) {
+      [day, month] = [month, day];
+    }
+
     return new Date(year, month - 1, day);
   }
 
@@ -35,7 +36,12 @@ function parseDate(raw: unknown): Date {
     return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
   }
 
-  // Fallback: try native parse but be careful
+  // Serial number (from Excel)
+  const num = Number(str);
+  if (!isNaN(num) && num > 40000 && num < 60000) {
+    return new Date((num - 25569) * 86400 * 1000);
+  }
+
   const parsed = new Date(str);
   return isNaN(parsed.getTime()) ? new Date() : parsed;
 }
@@ -82,9 +88,11 @@ export async function POST(req: NextRequest) {
     const amountUnit = formData.get("amountUnit") as string || "dong";
 
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: "array", cellDates: false, raw: false });
+    // Read with dateNF to force date format, and raw:true to get original values
+    const workbook = XLSX.read(buffer, { type: "array", cellDates: true, dateNF: "dd/mm/yyyy" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false });
+    // Get rows with raw values — dates come as JS Date objects when cellDates:true
+    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false, dateNF: "dd/mm/yyyy" });
 
     if (rows.length === 0) return NextResponse.json({ error: "File trống" }, { status: 400 });
 
