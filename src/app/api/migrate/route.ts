@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/db";
 
 export async function GET(req: NextRequest) {
-  // Protect with a simple secret param
   const key = new URL(req.url).searchParams.get("key");
-  if (key !== process.env.JWT_SECRET) {
+  const secret = process.env.MIGRATE_SECRET || process.env.INVITE_CODE;
+  if (!secret || key !== secret) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

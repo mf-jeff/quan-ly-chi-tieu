@@ -8,7 +8,10 @@ export async function POST(req: NextRequest) {
     const { email, password, name, inviteCode } = await req.json();
 
     // Invite code required — only owner can share this code
-    const validCode = process.env.INVITE_CODE || "VAULT2026";
+    const validCode = process.env.INVITE_CODE;
+    if (!validCode) {
+      return NextResponse.json({ error: "Đăng ký tạm thời bị tắt" }, { status: 503 });
+    }
     if (!inviteCode || inviteCode.trim().toUpperCase() !== validCode.toUpperCase()) {
       return NextResponse.json(
         { error: "Mã mời không hợp lệ" },
