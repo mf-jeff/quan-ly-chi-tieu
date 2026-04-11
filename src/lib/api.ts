@@ -150,10 +150,15 @@ export const savingsApi = {
 };
 
 // Loans
+export interface LoanPaymentData {
+  id: string; loanId: string; amount: number; note: string | null; date: string; createdAt: string;
+}
+
 export interface LoanData {
   id: string; type: string; lender: string; borrower: string; amount: number;
   paidAmount: number; interestRate: number | null; date: string; dueDate: string | null;
   isPaid: boolean; note: string | null; createdAt: string;
+  payments: LoanPaymentData[];
 }
 
 export const loanApi = {
@@ -161,6 +166,12 @@ export const loanApi = {
   create: (data: Record<string, unknown>) => request("/loans", { method: "POST", body: JSON.stringify(data) }),
   update: (id: string, data: Record<string, unknown>) => request(`/loans/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   delete: (id: string) => request(`/loans/${id}`, { method: "DELETE" }),
+  addPayment: (loanId: string, data: { amount: number; note?: string; date?: string }) =>
+    request<{ payment: LoanPaymentData; totalPaid: number }>(`/loans/${loanId}/payments`, { method: "POST", body: JSON.stringify(data) }),
+  updatePayment: (loanId: string, paymentId: string, data: Record<string, unknown>) =>
+    request<{ success: boolean; totalPaid: number }>(`/loans/${loanId}/payments/${paymentId}`, { method: "PUT", body: JSON.stringify(data) }),
+  deletePayment: (loanId: string, paymentId: string) =>
+    request<{ success: boolean; totalPaid: number }>(`/loans/${loanId}/payments/${paymentId}`, { method: "DELETE" }),
 };
 
 // Export

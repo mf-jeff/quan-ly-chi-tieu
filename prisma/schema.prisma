@@ -137,9 +137,24 @@ model Loan {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments LoanPayment[]
 
   @@map("loans")
+}
+
+model LoanPayment {
+  id        String   @id @default(cuid())
+  loanId    String   @map("loan_id")
+  amount    Float
+  note      String?
+  date      DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@index([loanId])
+  @@map("loan_payments")
 }
 
 model RecurringTransaction {

@@ -183,6 +183,36 @@ export function useDeleteLoan() {
   });
 }
 
+export function useAddLoanPayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, data }: { loanId: string; data: { amount: number; note?: string; date?: string } }) =>
+      loanApi.addPayment(loanId, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["loans"] }); toast.success("Đã ghi nhận"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUpdateLoanPayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, paymentId, data }: { loanId: string; paymentId: string; data: Record<string, unknown> }) =>
+      loanApi.updatePayment(loanId, paymentId, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["loans"] }); toast.success("Đã cập nhật"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteLoanPayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, paymentId }: { loanId: string; paymentId: string }) =>
+      loanApi.deletePayment(loanId, paymentId),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["loans"] }); toast.success("Đã xóa"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 // --- User Settings ---
 
 export function useUserSettings() {

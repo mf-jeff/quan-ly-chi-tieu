@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   const loans = await prisma.loan.findMany({
     where: { userId: payload.userId },
     orderBy: { createdAt: "desc" },
+    include: { payments: { orderBy: { date: "desc" } } },
   });
 
   const totalLent = loans.filter((l) => !l.isPaid).reduce((s, l) => s + (l.amount - l.paidAmount), 0);
