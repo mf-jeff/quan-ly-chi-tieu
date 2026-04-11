@@ -7,6 +7,7 @@ import {
   Settings2, ChevronDown, ChevronUp, Pencil,
 } from "lucide-react";
 import { useSavings, useAddSavingsItem, useUpdateSavingsItem, useDeleteSavingsItem, useAssetTypes, useAddAssetType, useDeleteAssetType } from "@/lib/hooks";
+import LoansSection from "@/components/dashboard/LoansSection";
 import { getIcon, availableIcons } from "@/lib/icon-map";
 import { formatVND, formatDateVN } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -424,6 +425,9 @@ export default function SavingsPage() {
           {assetTypes.map((at) => renderTypeSection(at.typeKey))}
         </div>
       )}
+
+      {/* Loans Section */}
+      <LoansSection />
 
       {/* Type Manager Modal */}
       {showTypeManager && (

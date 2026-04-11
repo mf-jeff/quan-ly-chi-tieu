@@ -149,6 +149,20 @@ export const savingsApi = {
     request<{ success: boolean }>(`/savings/${id}`, { method: "DELETE" }),
 };
 
+// Loans
+export interface LoanData {
+  id: string; lender: string; borrower: string; amount: number;
+  interestRate: number | null; date: string; dueDate: string | null;
+  isPaid: boolean; note: string | null; createdAt: string;
+}
+
+export const loanApi = {
+  list: () => request<{ loans: LoanData[]; totalLent: number; totalPaid: number }>("/loans"),
+  create: (data: Record<string, unknown>) => request("/loans", { method: "POST", body: JSON.stringify(data) }),
+  update: (id: string, data: Record<string, unknown>) => request(`/loans/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  delete: (id: string) => request(`/loans/${id}`, { method: "DELETE" }),
+};
+
 // Export
 export const exportApi = {
   download: async (format: "xlsx" | "csv", startDate?: string, endDate?: string) => {

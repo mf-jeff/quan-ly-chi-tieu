@@ -22,6 +22,7 @@ model User {
   categories            Category[]
   budgets               Budget[]
   savingsItems          SavingsItem[]
+  loans                 Loan[]
   assetTypes            AssetType[]
   recurringTransactions RecurringTransaction[]
 
@@ -118,6 +119,25 @@ model SavingsItem {
 
   @@index([userId, type])
   @@map("savings_items")
+}
+
+model Loan {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  lender       String    // người cho vay
+  borrower     String    // người vay
+  amount       Float     // số tiền
+  interestRate Float?    @map("interest_rate") // lãi suất %/năm
+  date         DateTime  @default(now()) // ngày cho vay
+  dueDate      DateTime? @map("due_date") // ngày trả
+  isPaid       Boolean   @default(false) @map("is_paid")
+  note         String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("loans")
 }
 
 model RecurringTransaction {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { transactionApi, categoryApi, budgetApi, savingsApi, userSettingsApi, assetTypeApi } from "./api";
+import { transactionApi, categoryApi, budgetApi, savingsApi, userSettingsApi, assetTypeApi, loanApi } from "./api";
 import { useDateStore } from "./date-store";
 import { toast } from "sonner";
 
@@ -146,6 +146,39 @@ export function useDeleteSavingsItem() {
       qc.invalidateQueries({ queryKey: ["savings"] });
       toast.success("Đã xóa");
     },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// --- Loans ---
+
+export function useLoans() {
+  return useQuery({ queryKey: ["loans"], queryFn: () => loanApi.list(), staleTime: 0 });
+}
+
+export function useAddLoan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: loanApi.create,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["loans"] }); toast.success("Đã thêm khoản vay"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUpdateLoan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) => loanApi.update(id, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["loans"] }); toast.success("Đã cập nhật"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteLoan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: loanApi.delete,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["loans"] }); toast.success("Đã xóa"); },
     onError: (e: Error) => toast.error(e.message),
   });
 }
