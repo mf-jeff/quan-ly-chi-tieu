@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { X } from "lucide-react";
 import { useCategories, useAddTransaction } from "@/lib/hooks";
 import { getIcon } from "@/lib/icon-map";
@@ -135,7 +135,7 @@ export default function AddTransactionModal({ open, onClose }: Props) {
 
           <div>
             <label className="text-sm font-medium text-card-foreground mb-2 block">{t("addTx.note")}</label>
-            <textarea value={note} onChange={(e) => { setNote(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }} placeholder={t("addTx.notePlaceholder")} rows={1}
+            <textarea ref={(el) => { if (el) { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; } }} value={note} onChange={(e) => { setNote(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }} placeholder={t("addTx.notePlaceholder")} rows={1}
               className="w-full px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30 resize-none overflow-hidden" />
           </div>
 
