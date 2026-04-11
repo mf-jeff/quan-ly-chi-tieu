@@ -363,32 +363,35 @@ export default function TransactionsPage() {
               </div>
 
               {/* Mobile row */}
-              <div className="flex sm:hidden items-center gap-2">
-                <input type="checkbox" checked={selected.has(tx.id)}
-                  onChange={(e) => { const next = new Set(selected); if (e.target.checked) next.add(tx.id); else next.delete(tx.id); setSelected(next); }}
-                  className="w-4 h-4 rounded border-border accent-primary-light cursor-pointer shrink-0" />
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}30` }}>
-                  <Icon className="w-4 h-4" style={{ color }} />
-                </div>
-                <div className="flex-1 min-w-0" onClick={() => setEditTx(editData)}>
-                  <div className="flex items-center gap-1.5">
+              <div className="sm:hidden" onClick={() => setEditTx(editData)}>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" checked={selected.has(tx.id)}
+                    onChange={(e) => { e.stopPropagation(); const next = new Set(selected); if (e.target.checked) next.add(tx.id); else next.delete(tx.id); setSelected(next); }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border accent-primary-light cursor-pointer shrink-0" />
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}30` }}>
+                    <Icon className="w-4 h-4" style={{ color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-card-foreground truncate">{tx.category.name}</p>
-                    <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded-md shrink-0"
-                      style={{ backgroundColor: `${payerColors[tx.payer] || "#94a3b8"}15`, color: payerColors[tx.payer] || "#94a3b8" }}>
-                      {tx.payer || "—"}
-                    </span>
+                    {tx.note && <p className="text-[11px] text-muted truncate mt-0.5">{tx.note}</p>}
                   </div>
-                  <div className="flex items-center gap-1 text-[11px] text-muted mt-0.5">
-                    {tx.note && <span className="truncate max-w-[120px]">{tx.note}</span>}
-                    {tx.note && <span>·</span>}
-                    <span>{tx.paymentMethod === "bank" ? "CK" : tx.paymentMethod === "card" ? "Thẻ" : "TM"}</span>
-                    <span>·</span>
-                    <span>{formatDateShort(tx.date)}</span>
-                  </div>
+                  <span className={`text-sm font-bold tabular-nums shrink-0 ${isIncome ? "text-accent" : "text-danger"}`}>
+                    {isIncome ? "+" : "-"}{formatVND(tx.amount)}
+                  </span>
                 </div>
-                <span className={`text-sm font-bold tabular-nums shrink-0 ${isIncome ? "text-accent" : "text-danger"}`}>
-                  {isIncome ? "+" : "-"}{formatVND(tx.amount)}
-                </span>
+                <div className="flex items-center gap-2 mt-1.5 ml-[4.5rem]">
+                  <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md"
+                    style={{ backgroundColor: `${payerColors[tx.payer] || "#94a3b8"}15`, color: payerColors[tx.payer] || "#94a3b8" }}>
+                    {tx.payer || "—"}
+                  </span>
+                  <span className="px-2 py-0.5 text-[10px] font-medium rounded-md bg-muted-bg text-muted">
+                    {tx.paymentMethod === "bank" ? "🏦 CK" : tx.paymentMethod === "card" ? "💳 Thẻ" : "💵 TM"}
+                  </span>
+                  <span className="text-[10px] text-muted ml-auto">
+                    {formatDateShort(tx.date)}
+                  </span>
+                </div>
               </div>
             </div>
           );
