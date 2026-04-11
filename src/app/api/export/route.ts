@@ -22,39 +22,58 @@ export async function GET(req: NextRequest) {
   const transactions = await prisma.transaction.findMany({
     where,
     include: { category: true },
-    orderBy: { date: "desc" },
+    orderBy: { date: "asc" },
   });
+
+  // Build filename from date range
+  let fileName = "giao-dich";
+  if (startDate) {
+    const d = new Date(startDate);
+    const m = d.getMonth() + 1;
+    const y = d.getFullYear();
+    fileName = `giao dich thang ${m} nam ${y}`;
+  }
 
   const data = transactions.map((tx) => ({
     "Ngày": (() => { const d = new Date(tx.date); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`; })(),
-    "Loại": tx.type === "income" ? "Thu nhập" : "Chi tiêu",
+    "Người": tx.payer || "",
     "Danh mục": tx.category.name,
-    "Số tiền": tx.amount,
     "Ghi chú": tx.note,
-    "Tiền tệ": tx.currency,
+    "Số tiền": tx.amount,
+    "Thanh toán": tx.paymentMethod === "bank" ? "Chuyển khoản" : tx.paymentMethod === "card" ? "Thẻ" : "Tiền mặt",
+    "Loại": tx.type === "income" ? "Thu nhập" : "Chi tiêu",
   }));
 
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  ws["!cols"] = [
+    { wch: 12 },  // A: Ngày
+    { wch: 10 },  // B: Người
+    { wch: 15 },  // C: Danh mục
+    { wch: 40 },  // D: Ghi chú
+    { wch: 15 },  // E: Số tiền
+    { wch: 14 },  // F: Thanh toán
+    { wch: 12 },  // G: Loại
+  ];
+
   if (format === "csv") {
-    const ws = XLSX.utils.json_to_sheet(data);
     const csv = XLSX.utils.sheet_to_csv(ws);
     return new NextResponse(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": "attachment; filename=giao-dich.csv",
+        "Content-Disposition": `attachment; filename=${encodeURIComponent(fileName)}.csv`,
       },
     });
   }
 
-  // Default: xlsx
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(data);
   XLSX.utils.book_append_sheet(wb, ws, "Giao dịch");
   const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 
   return new NextResponse(buffer, {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": "attachment; filename=giao-dich.xlsx",
+      "Content-Disposition": `attachment; filename=${encodeURIComponent(fileName)}.xlsx`,
     },
   });
 }
