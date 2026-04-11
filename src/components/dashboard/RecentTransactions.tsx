@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTransactions } from "@/lib/hooks";
 import { getIcon } from "@/lib/icon-map";
 import { formatVND, formatDateShort } from "@/lib/utils";
@@ -14,7 +15,7 @@ export default function RecentTransactions() {
     <div className="bg-card rounded-2xl p-5 border border-border">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-card-foreground">{t("recent.title")}</h3>
-        <a href="/transactions" className="text-primary-light text-sm hover:underline">{t("recent.viewAll")}</a>
+        <Link href="/transactions" className="text-primary-light text-sm hover:underline">{t("recent.viewAll")}</Link>
       </div>
       <div className="space-y-3">
         {recent.length === 0 && <p className="text-muted text-sm text-center py-4">{t("recent.empty")}</p>}

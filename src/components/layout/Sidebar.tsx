@@ -16,7 +16,6 @@ import {
   Moon,
   Sun,
   LogOut,
-  RefreshCw,
 } from "lucide-react";
 import VaultLogo from "@/components/VaultLogo";
 import { useTheme } from "@/components/ThemeProvider";
@@ -48,9 +47,6 @@ export default function Sidebar() {
           <VaultLogo size={24} className="text-warning" />
           <span className="text-warning font-extrabold text-lg">Vault</span>
           <Menu className="w-5 h-5 text-sidebar-foreground/60" />
-        </button>
-        <button onClick={() => window.location.reload()} className="p-2 text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors">
-          <RefreshCw className="w-4 h-4" />
         </button>
       </div>
 
@@ -133,13 +129,6 @@ export default function Sidebar() {
 
         {/* Bottom actions */}
         <div className="border-t border-white/10 p-3 space-y-1">
-          <button
-            onClick={() => window.location.reload()}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground transition-colors ${collapsed ? "justify-center" : ""}`}
-          >
-            <RefreshCw className="w-5 h-5 shrink-0" />
-            {!collapsed && <span className="text-sm font-medium">Tải lại</span>}
-          </button>
           <button
             onClick={toggleTheme}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground transition-colors ${collapsed ? "justify-center" : ""}`}

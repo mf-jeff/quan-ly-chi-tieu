@@ -31,9 +31,9 @@ export default function SummaryCards() {
   ];
 
   return (
-    <div className="flex gap-3 scroll-x-mobile sm:grid sm:grid-cols-2 xl:grid-cols-4 sm:gap-4">
+    <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 sm:grid sm:grid-cols-2 xl:grid-cols-4 sm:gap-4 sm:overflow-visible sm:snap-none sm:pb-0 scrollbar-hide">
       {cards.map((card, i) => (
-        <div key={card.title} className={`rounded-2xl p-4 sm:p-5 border border-border card-hover animate-fade-in min-w-[160px] sm:min-w-0 ${card.tint}`} style={{ animationDelay: `${i * 50}ms` }}>
+        <div key={card.title} className={`rounded-2xl p-4 sm:p-5 border border-border card-hover animate-fade-in min-w-[160px] sm:min-w-0 snap-start ${card.tint}`} style={{ animationDelay: `${i * 50}ms` }}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-muted text-sm font-medium">{card.title}</span>
             <div className={`${card.bgColor} ${card.color} p-2.5 rounded-xl`}><card.icon className="w-5 h-5" /></div>

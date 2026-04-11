@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { useBudgets } from "@/lib/hooks";
 import { getIcon } from "@/lib/icon-map";
@@ -18,7 +19,7 @@ export default function BudgetProgress() {
     <div className="bg-card rounded-2xl p-5 border border-border">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-card-foreground">{t("budget.title")}</h3>
-        <a href="/budget" className="text-primary-light text-sm hover:underline">{t("budget.detail")}</a>
+        <Link href="/budget" className="text-primary-light text-sm hover:underline">{t("budget.detail")}</Link>
       </div>
       <div className="space-y-4">
         {budgets.length === 0 && <p className="text-muted text-sm text-center py-4">{t("recent.empty")}</p>}

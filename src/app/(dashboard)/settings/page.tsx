@@ -220,7 +220,7 @@ export default function SettingsPage() {
           <button onClick={toggleTheme}
             className={`relative w-11 h-6 rounded-full transition-colors ${theme === "dark" ? "bg-accent" : "bg-muted-bg border border-border"}`}
             role="switch" aria-checked={theme === "dark"}>
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${theme === "dark" ? "translate-x-5.5" : "translate-x-0.5"}`} />
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${theme === "dark" ? "translate-x-[22px]" : "translate-x-0.5"}`} />
           </button>
         </div>
 

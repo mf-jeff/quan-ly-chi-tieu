@@ -60,6 +60,7 @@ export default function TransactionsPage() {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [editTx, setEditTx] = useState<{ id: string; type: string; categoryId: string; amount: number; note: string; payer: string; paymentMethod: string; date: string } | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const [confirmBatchDelete, setConfirmBatchDelete] = useState(false);
   const [importing, setImporting] = useState(false);
   const [amountUnit, setAmountUnit] = useState<"dong" | "k">("k");
   const [importResult, setImportResult] = useState<{ imported: number; skipped: number; total: number; categoriesCreated?: number; newCategories?: string[]; errors: string[] } | null>(null);
@@ -254,10 +255,16 @@ export default function TransactionsPage() {
               {selected.size > 0 ? `Đã chọn ${selected.size} giao dịch` : "Chọn tất cả"}
             </span>
           </div>
-          {selected.size > 0 && (
-            <button
-              onClick={async () => {
-                if (!confirm(`Xóa ${selected.size} giao dịch? Không thể hoàn tác!`)) return;
+          {selected.size > 0 && !confirmBatchDelete && (
+            <button onClick={() => setConfirmBatchDelete(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-danger border border-danger/30 rounded-xl hover:bg-danger/10 transition-colors">
+              <Trash2 className="w-3.5 h-3.5" /> Xóa {selected.size}
+            </button>
+          )}
+          {confirmBatchDelete && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-danger">Xóa {selected.size} giao dịch?</span>
+              <button onClick={async () => {
                 const token = getToken();
                 await fetch("/api/transactions/batch-delete", {
                   method: "POST",
@@ -265,18 +272,16 @@ export default function TransactionsPage() {
                   body: JSON.stringify({ ids: Array.from(selected) }),
                 });
                 const count = selected.size;
-                setSelected(new Set());
+                setSelected(new Set()); setConfirmBatchDelete(false);
                 await qc.invalidateQueries({ queryKey: ["transactions"] });
                 qc.invalidateQueries({ queryKey: ["budgets"] });
-                // If current page is now empty, go back
                 const remaining = pagination.total - count;
                 const maxPage = Math.max(1, Math.ceil(remaining / 50));
                 if (page > maxPage) setPage(maxPage);
                 toast.success(`Đã xóa ${count} giao dịch`);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-danger border border-danger/30 rounded-xl hover:bg-danger/10 transition-colors">
-              <Trash2 className="w-3.5 h-3.5" /> Xóa {selected.size}
-            </button>
+              }} className="px-3 py-1.5 text-sm font-medium text-white bg-danger rounded-xl hover:bg-danger/90 transition-colors">Xóa</button>
+              <button onClick={() => setConfirmBatchDelete(false)} className="px-3 py-1.5 text-sm text-muted">Hủy</button>
+            </div>
           )}
         </div>
       )}

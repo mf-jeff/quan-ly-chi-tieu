@@ -67,10 +67,11 @@ export default function BudgetPage() {
         <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <div className="text-center min-w-[140px]">
+        <button onClick={() => { setMonth(now.getMonth() + 1); setYear(now.getFullYear()); }}
+          className="text-center min-w-[140px] hover:bg-muted-bg rounded-xl py-1 transition-colors">
           <p className="text-lg font-bold text-foreground">{monthNames[month]}</p>
-          <p className="text-xs text-muted">{year}</p>
-        </div>
+          <p className="text-xs text-muted">{year}{(month !== now.getMonth() + 1 || year !== now.getFullYear()) ? " · Bấm để về tháng này" : ""}</p>
+        </button>
         <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
           <ChevronRight className="w-5 h-5" />
         </button>

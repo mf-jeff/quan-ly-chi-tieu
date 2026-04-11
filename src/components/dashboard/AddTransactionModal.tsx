@@ -58,7 +58,6 @@ export default function AddTransactionModal({ open, onClose }: Props) {
     }
     if (!parsedAmount || parsedAmount <= 0) { setError(t("addTx.error.amount")); return; }
     if (!categoryId) { setError(t("addTx.error.category")); return; }
-    if (!payer) { setError("Vui lòng chọn người"); return; }
 
     addTx.mutate(
       { amount: parsedAmount, type, categoryId, note: note.trim(), payer: payer.trim(), paymentMethod, date: new Date(`${dateVal}T${timeVal}`).toISOString() },

@@ -15,7 +15,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
     <div className="bg-card border border-border rounded-xl p-3 shadow-lg">
       <p className="text-sm font-medium text-card-foreground mb-1">{label}</p>
       {payload.map((e) => (
-        <p key={e.dataKey} className="text-xs text-muted">{e.dataKey === "income" ? "Income" : "Expense"}: {formatShortVND(e.value)}</p>
+        <p key={e.dataKey} className="text-xs text-muted">{e.dataKey === "income" ? "Thu nhập" : "Chi tiêu"}: {formatShortVND(e.value)}</p>
       ))}
     </div>
   );
@@ -103,10 +103,11 @@ export default function StatisticsPage() {
         <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <div className="text-center min-w-[140px]">
+        <button onClick={() => { setMonth(now.getMonth() + 1); setYear(now.getFullYear()); }}
+          className="text-center min-w-[140px] hover:bg-muted-bg rounded-xl py-1 transition-colors">
           <p className="text-lg font-bold text-foreground">{monthNames[month]}</p>
-          <p className="text-xs text-muted">{year}</p>
-        </div>
+          <p className="text-xs text-muted">{year}{(month !== now.getMonth() + 1 || year !== now.getFullYear()) ? " · Bấm để về tháng này" : ""}</p>
+        </button>
         <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
           <ChevronRight className="w-5 h-5" />
         </button>
