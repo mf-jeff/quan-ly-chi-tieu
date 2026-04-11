@@ -35,26 +35,23 @@ export default function StatisticsPage() {
   const [filterCat, setFilterCat] = useState("all");
   const [filterPayer, setFilterPayer] = useState("all");
 
-  // Compare month (default: previous month)
-  const defaultCmpMonth = month === 1 ? 12 : month - 1;
-  const defaultCmpYear = month === 1 ? year - 1 : year;
-  const [cmpMonth, setCmpMonth] = useState(defaultCmpMonth);
-  const [cmpYear, setCmpYear] = useState(defaultCmpYear);
-
-  // Update compare month when main month changes
-  const [lastMonth, setLastMonth] = useState(month);
-  const [lastYear, setLastYear] = useState(year);
-  if (month !== lastMonth || year !== lastYear) {
-    setLastMonth(month); setLastYear(year);
-    setCmpMonth(month === 1 ? 12 : month - 1);
-    setCmpYear(month === 1 ? year - 1 : year);
-  }
+  // Compare: 2 independent months (default: current month vs previous)
+  const [cmpAMonth, setCmpAMonth] = useState(now.getMonth() + 1);
+  const [cmpAYear, setCmpAYear] = useState(now.getFullYear());
+  const [cmpBMonth, setCmpBMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
+  const [cmpBYear, setCmpBYear] = useState(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear());
 
   function prevMonth() { if (month === 1) { setMonth(12); setYear(year - 1); } else setMonth(month - 1); }
   function nextMonth() { if (month === 12) { setMonth(1); setYear(year + 1); } else setMonth(month + 1); }
   const monthNames = ["", "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
 
-  const { data: compareData } = useMonthComparison(month, year, cmpMonth, cmpYear);
+  const { data: compareData } = useMonthComparison(cmpAMonth, cmpAYear, cmpBMonth, cmpBYear);
+
+  // Generate month options for dropdowns (last 24 months)
+  const monthOptions = Array.from({ length: 24 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    return { month: d.getMonth() + 1, year: d.getFullYear(), label: `T${d.getMonth() + 1}/${d.getFullYear()}` };
+  });
 
   const allTxs = data?.transactions || [];
   const categories = catData?.categories || [];
@@ -244,24 +241,17 @@ export default function StatisticsPage() {
           <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
             <div className="flex items-center gap-2">
               <ArrowRightLeft className="w-5 h-5 text-primary-light" />
-              <h3 className="text-lg font-semibold text-card-foreground">
-                So sánh T{month} với T{compareData.prevMonth}/{compareData.prevYear}
-              </h3>
+              <h3 className="text-lg font-semibold text-card-foreground">So sánh chi tiêu</h3>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">So với:</span>
-              <select value={`${cmpYear}-${cmpMonth}`} onChange={(e) => { const [y, m] = e.target.value.split("-").map(Number); setCmpMonth(m); setCmpYear(y); }}
-                className="bg-muted-bg border border-border rounded-xl px-3 py-1.5 text-sm text-foreground focus:outline-none">
-                {Array.from({ length: 12 }, (_, i) => {
-                  const m = ((month - 2 - i + 12) % 12) + 1;
-                  const y = year - Math.floor((month - 1 - (m <= month ? 0 : 1) + (i >= month ? 1 : 0)) / 12 + (m > month || (m === month && i > 0) ? 1 : 0));
-                  // Simpler: just generate last 12 months
-                  const d = new Date(year, month - 2 - i, 1);
-                  const mo = d.getMonth() + 1;
-                  const yr = d.getFullYear();
-                  if (mo === month && yr === year) return null;
-                  return <option key={`${yr}-${mo}`} value={`${yr}-${mo}`}>T{mo}/{yr}</option>;
-                })}
+            <div className="flex items-center gap-2 flex-wrap">
+              <select value={`${cmpAYear}-${cmpAMonth}`} onChange={(e) => { const [y, m] = e.target.value.split("-").map(Number); setCmpAMonth(m); setCmpAYear(y); }}
+                className="bg-muted-bg border border-border rounded-xl px-3 py-1.5 text-sm text-foreground focus:outline-none font-medium">
+                {monthOptions.map((o) => <option key={`a-${o.year}-${o.month}`} value={`${o.year}-${o.month}`}>{o.label}</option>)}
+              </select>
+              <span className="text-xs text-muted">với</span>
+              <select value={`${cmpBYear}-${cmpBMonth}`} onChange={(e) => { const [y, m] = e.target.value.split("-").map(Number); setCmpBMonth(m); setCmpBYear(y); }}
+                className="bg-muted-bg border border-border rounded-xl px-3 py-1.5 text-sm text-foreground focus:outline-none font-medium">
+                {monthOptions.map((o) => <option key={`b-${o.year}-${o.month}`} value={`${o.year}-${o.month}`}>{o.label}</option>)}
               </select>
             </div>
           </div>
@@ -269,7 +259,7 @@ export default function StatisticsPage() {
           {/* Total comparison */}
           <div className="flex items-center justify-between p-4 rounded-xl bg-muted-bg/50 mb-4">
             <div>
-              <p className="text-xs text-muted">T{compareData.prevMonth}</p>
+              <p className="text-xs text-muted">T{compareData.prevMonth}/{compareData.prevYear}</p>
               <p className="text-lg font-bold text-card-foreground">{formatVND(compareData.totalPrevious)}</p>
             </div>
             <div className="flex flex-col items-center">
@@ -284,7 +274,7 @@ export default function StatisticsPage() {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-muted">T{month}</p>
+              <p className="text-xs text-muted">T{compareData.month}/{compareData.year}</p>
               <p className="text-lg font-bold text-card-foreground">{formatVND(compareData.totalCurrent)}</p>
             </div>
           </div>
@@ -305,7 +295,7 @@ export default function StatisticsPage() {
                     <div className="flex items-center gap-2 text-[11px] text-muted mt-0.5">
                       <span>T{compareData.prevMonth}: {formatVND(cat.previous)}</span>
                       <span>→</span>
-                      <span>T{month}: {formatVND(cat.current)}</span>
+                      <span>T{compareData.month}: {formatVND(cat.current)}</span>
                     </div>
                   </div>
                   <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold shrink-0 ${
