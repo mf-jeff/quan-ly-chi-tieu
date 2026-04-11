@@ -88,22 +88,27 @@ export async function POST(req: NextRequest) {
     const amountUnit = formData.get("amountUnit") as string || "dong";
 
     const buffer = await file.arrayBuffer();
-    // Read with dateNF to force date format, and raw:true to get original values
-    const workbook = XLSX.read(buffer, { type: "array", cellDates: true, dateNF: "dd/mm/yyyy" });
+    const workbook = XLSX.read(buffer, { type: "array", cellDates: false });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    // Get rows with raw values — dates come as JS Date objects when cellDates:true
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false, dateNF: "dd/mm/yyyy" });
+
+    // Force all date cells to be read as DD/MM/YYYY strings
+    // Walk through cells and convert any date serial to DD/MM/YYYY
+    for (const addr of Object.keys(sheet)) {
+      if (addr[0] === "!") continue;
+      const cell = sheet[addr];
+      if (cell && cell.t === "n" && cell.w && /\d+\/\d+\/\d+/.test(cell.w)) {
+        // Cell is a number but displayed as date — use the formatted string
+        cell.t = "s";
+        cell.v = cell.w;
+      }
+    }
+
+    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
 
     if (rows.length === 0) return NextResponse.json({ error: "File trống" }, { status: 400 });
 
     const headers = Object.keys(rows[0]);
     const cols = detectColumns(headers);
-
-    // Debug: log first row raw values to see what XLSX returns
-    const dateCol = cols.date;
-    if (dateCol && rows[0]) {
-      console.log("DEBUG date col:", dateCol, "value:", rows[0][dateCol], "type:", typeof rows[0][dateCol]);
-    }
 
     if (!cols.amount) {
       return NextResponse.json({ error: `Không tìm thấy cột số tiền. Các cột: ${headers.join(", ")}` }, { status: 400 });
@@ -225,7 +230,6 @@ export async function POST(req: NextRequest) {
       categoriesCreated,
       newCategories: newCategoryNames,
       total: rows.length,
-      _debug: { dateCol: cols.date, firstDateRaw: cols.date && rows[0] ? String(rows[0][cols.date]) : null, firstDateType: cols.date && rows[0] ? typeof rows[0][cols.date] : null },
       errors: errors.slice(0, 10),
     });
   } catch (e) {
