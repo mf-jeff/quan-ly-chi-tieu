@@ -91,6 +91,8 @@ export async function POST(req: NextRequest) {
     let skipped = 0;
     let categoriesCreated = 0;
     const errors: string[] = [];
+    const newCategoryNames: string[] = [];
+    const importedDetails: Array<{ row: number; category: string; amount: number; note: string }> = [];
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -132,6 +134,7 @@ export async function POST(req: NextRequest) {
             if (!catMap[rawCatLower + "_counted"]) {
               catMap[rawCatLower + "_counted"] = "1";
               categoriesCreated++;
+              newCategoryNames.push(catName);
             }
             categoryId = created.id;
           } catch {
@@ -171,6 +174,7 @@ export async function POST(req: NextRequest) {
           },
         });
         imported++;
+        importedDetails.push({ row: rowNum, category: rawCat.charAt(0).toUpperCase() + rawCat.slice(1), amount: finalAmount, note });
       } catch {
         skipped++;
         if (errors.length < 10) errors.push(`Dòng ${rowNum}: Lỗi xử lý`);
@@ -182,6 +186,7 @@ export async function POST(req: NextRequest) {
       imported,
       skipped,
       categoriesCreated,
+      newCategories: newCategoryNames,
       total: rows.length,
       errors: errors.slice(0, 10),
     });

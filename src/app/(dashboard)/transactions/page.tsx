@@ -76,7 +76,8 @@ export default function TransactionsPage() {
   const [showImport, setShowImport] = useState(false);
   const [importing, setImporting] = useState(false);
   const [amountUnit, setAmountUnit] = useState<"dong" | "k">("k");
-  const [importResult, setImportResult] = useState<{ imported: number; skipped: number; total: number; categoriesCreated?: number; errors: string[] } | null>(null);
+  const [importResult, setImportResult] = useState<{ imported: number; skipped: number; total: number; categoriesCreated?: number; newCategories?: string[]; errors: string[] } | null>(null);
+  const [showImportDetails, setShowImportDetails] = useState<string | null>(null); // "imported" | "skipped" | "categories"
   const fileRef = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
 
@@ -510,24 +511,39 @@ export default function TransactionsPage() {
                       <p className="text-2xl font-bold text-accent">{importResult.imported}</p>
                       <p className="text-xs text-muted">Thành công</p>
                     </div>
-                    <div className="bg-warning/5 rounded-xl p-3 text-center">
+                    <button onClick={() => setShowImportDetails(showImportDetails === "skipped" ? null : "skipped")}
+                      className="bg-warning/5 rounded-xl p-3 text-center hover:bg-warning/10 transition-colors">
                       <p className="text-2xl font-bold text-warning">{importResult.skipped}</p>
-                      <p className="text-xs text-muted">Bỏ qua</p>
-                    </div>
+                      <p className="text-xs text-muted">Bỏ qua {importResult.skipped > 0 && "▾"}</p>
+                    </button>
                     {importResult.categoriesCreated ? (
-                      <div className="bg-primary-light/5 rounded-xl p-3 text-center">
+                      <button onClick={() => setShowImportDetails(showImportDetails === "categories" ? null : "categories")}
+                        className="bg-primary-light/5 rounded-xl p-3 text-center hover:bg-primary-light/10 transition-colors">
                         <p className="text-2xl font-bold text-primary-light">{importResult.categoriesCreated}</p>
-                        <p className="text-xs text-muted">Danh mục mới</p>
-                      </div>
+                        <p className="text-xs text-muted">Danh mục mới ▾</p>
+                      </button>
                     ) : null}
                   </div>
 
-                  {importResult.errors.length > 0 && (
+                  {/* Detail: skipped */}
+                  {showImportDetails === "skipped" && importResult.errors.length > 0 && (
                     <div className="bg-warning/5 rounded-xl p-3 space-y-1">
-                      <p className="text-xs font-medium text-warning flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Chi tiết lỗi:</p>
+                      <p className="text-xs font-medium text-warning flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Dòng bị bỏ qua:</p>
                       {importResult.errors.map((err, i) => (
                         <p key={i} className="text-xs text-muted">{err}</p>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Detail: new categories */}
+                  {showImportDetails === "categories" && importResult.newCategories && (
+                    <div className="bg-primary-light/5 rounded-xl p-3 space-y-1">
+                      <p className="text-xs font-medium text-primary-light">Danh mục được tạo mới:</p>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {importResult.newCategories.map((name, i) => (
+                          <span key={i} className="px-2 py-1 bg-primary-light/10 text-primary-light text-xs font-medium rounded-lg">{name}</span>
+                        ))}
+                      </div>
                     </div>
                   )}
 
