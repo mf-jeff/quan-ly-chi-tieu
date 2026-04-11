@@ -15,9 +15,11 @@ interface Props {
     categoryName: string;
     amount: number;
   } | null;
+  month?: number;
+  year?: number;
 }
 
-export default function BudgetModal({ open, onClose, editData }: Props) {
+export default function BudgetModal({ open, onClose, editData, month, year }: Props) {
   const { data: catData } = useCategories();
   const upsertBudget = useUpsertBudget();
   const t = useT();
@@ -47,7 +49,7 @@ export default function BudgetModal({ open, onClose, editData }: Props) {
     const parsed = Number(amount) || 0;
 
     upsertBudget.mutate(
-      { categoryId, amount: parsed },
+      { categoryId, amount: parsed, month, year },
       {
         onSuccess: () => onClose(),
         onError: (err) => setError(err.message),

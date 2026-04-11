@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Target, AlertTriangle, CheckCircle2, Plus, Pencil, Wallet } from "lucide-react";
+import { Target, AlertTriangle, CheckCircle2, Plus, Pencil, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
 import { useBudgets, useUserSettings, useUpdateUserSettings } from "@/lib/hooks";
 import { getIcon } from "@/lib/icon-map";
 import { formatVND } from "@/lib/utils";
@@ -9,11 +9,24 @@ import { useT } from "@/lib/i18n";
 import BudgetModal from "@/components/dashboard/BudgetModal";
 
 export default function BudgetPage() {
-  const { data } = useBudgets();
+  const now = new Date();
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(now.getFullYear());
+  const { data } = useBudgets(month, year);
   const t = useT();
   const budgets = data?.budgets || [];
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState<{ categoryId: string; categoryName: string; amount: number } | null>(null);
+
+  function prevMonth() {
+    if (month === 1) { setMonth(12); setYear(year - 1); }
+    else setMonth(month - 1);
+  }
+  function nextMonth() {
+    if (month === 12) { setMonth(1); setYear(year + 1); }
+    else setMonth(month + 1);
+  }
+  const monthNames = ["", "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
 
   const { data: settingsData } = useUserSettings();
   const updateSettings = useUpdateUserSettings();
@@ -46,6 +59,20 @@ export default function BudgetPage() {
         </div>
         <button onClick={openAdd} className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-primary-light transition-colors text-sm font-medium w-fit">
           <Plus className="w-4 h-4" />{t("budget.add")}
+        </button>
+      </div>
+
+      {/* Month selector */}
+      <div className="flex items-center justify-center gap-4">
+        <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <div className="text-center min-w-[140px]">
+          <p className="text-lg font-bold text-foreground">{monthNames[month]}</p>
+          <p className="text-xs text-muted">{year}</p>
+        </div>
+        <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
@@ -171,7 +198,7 @@ export default function BudgetPage() {
           );
         })}
       </div>
-      <BudgetModal open={showModal} onClose={() => setShowModal(false)} editData={editData} />
+      <BudgetModal open={showModal} onClose={() => setShowModal(false)} editData={editData} month={month} year={year} />
     </div>
   );
 }
