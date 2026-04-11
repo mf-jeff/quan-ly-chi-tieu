@@ -5,14 +5,37 @@ import * as XLSX from "xlsx";
 
 function parseDate(raw: unknown): Date {
   if (!raw) return new Date();
+
+  // Excel serial number
   if (typeof raw === "number") {
-    return new Date((raw - 25569) * 86400 * 1000);
+    // Excel serial date → JS date
+    // Note: XLSX library may auto-parse dates — the serial could be in US format
+    const d = new Date((raw - 25569) * 86400 * 1000);
+    // Validate reasonable date
+    if (d.getFullYear() >= 2000 && d.getFullYear() <= 2100) return d;
+    return new Date();
   }
+
   const str = String(raw).trim();
-  const ddmmyyyy = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
-  if (ddmmyyyy) {
-    return new Date(Number(ddmmyyyy[3]), Number(ddmmyyyy[2]) - 1, Number(ddmmyyyy[1]));
+
+  // DD/MM/YYYY or D/M/YYYY (Vietnamese format — day first)
+  const dmy = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
+  if (dmy) {
+    const day = Number(dmy[1]);
+    const month = Number(dmy[2]);
+    const year = Number(dmy[3]);
+    // If day > 12, it's definitely DD/MM (can't be month)
+    // If both <= 12, assume DD/MM (Vietnamese convention)
+    return new Date(year, month - 1, day);
   }
+
+  // YYYY-MM-DD (ISO format)
+  const iso = str.match(/^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})/);
+  if (iso) {
+    return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+  }
+
+  // Fallback: try native parse but be careful
   const parsed = new Date(str);
   return isNaN(parsed.getTime()) ? new Date() : parsed;
 }
@@ -59,9 +82,9 @@ export async function POST(req: NextRequest) {
     const amountUnit = formData.get("amountUnit") as string || "dong";
 
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: "array" });
+    const workbook = XLSX.read(buffer, { type: "array", cellDates: false, raw: false });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false });
 
     if (rows.length === 0) return NextResponse.json({ error: "File trống" }, { status: 400 });
 
