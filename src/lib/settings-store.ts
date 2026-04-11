@@ -38,8 +38,6 @@ interface SettingsStore {
   language: Language;
   setCurrency: (code: string) => void;
   setLanguage: (code: string) => void;
-  formatAmount: (amountVND: number) => string;
-  convertAndFormat: (amountVND: number) => string;
 }
 
 function loadSetting<T>(key: string, fallback: T): T {
@@ -72,18 +70,4 @@ export const useSettings = create<SettingsStore>((set, get) => ({
     }
   },
 
-  formatAmount: (amountVND) => {
-    const { currency } = get();
-    const converted = convertFromVND(amountVND, currency.code);
-    const noDecimals = ["VND", "KRW", "JPY"].includes(currency.code);
-    return new Intl.NumberFormat(currency.locale, {
-      style: "currency",
-      currency: currency.code,
-      maximumFractionDigits: noDecimals ? 0 : 2,
-    }).format(converted);
-  },
-
-  convertAndFormat: (amountVND) => {
-    return get().formatAmount(amountVND);
-  },
 }));

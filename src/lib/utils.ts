@@ -129,31 +129,3 @@ export function formatShortVND(amount: number): string {
   }
   return amount.toString();
 }
-
-export const categoryLabels: Record<string, string> = {
-  food: "Ăn uống",
-  transport: "Di chuyển",
-  shopping: "Mua sắm",
-  entertainment: "Giải trí",
-  bills: "Hóa đơn",
-  health: "Sức khỏe",
-  education: "Giáo dục",
-  salary: "Lương",
-  freelance: "Thu nhập phụ",
-  investment: "Đầu tư",
-  other: "Khác",
-};
-
-export const categoryColors: Record<string, string> = {
-  food: "#ef4444",
-  transport: "#3b82f6",
-  shopping: "#f59e0b",
-  entertainment: "#8b5cf6",
-  bills: "#06b6d4",
-  health: "#10b981",
-  education: "#f97316",
-  salary: "#22c55e",
-  freelance: "#14b8a6",
-  investment: "#6366f1",
-  other: "#94a3b8",
-};

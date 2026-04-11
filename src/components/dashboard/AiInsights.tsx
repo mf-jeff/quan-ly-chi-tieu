@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   TrendingUp, TrendingDown, PieChart, AlertTriangle, Target, PiggyBank,
-  Sparkles, Wallet, BookOpen, Calculator, Brain, ChevronRight,
+  Sparkles, Wallet, BookOpen, Calculator, Brain,
 } from "lucide-react";
 import type { LucideProps } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";

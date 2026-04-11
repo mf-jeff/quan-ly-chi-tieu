@@ -382,7 +382,10 @@ function getLang(): string {
   return "vi";
 }
 
+import { useCallback } from "react";
+
 export function useT() {
   const lang = getLang();
-  return (key: string) => t(key, lang);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useCallback((key: string) => t(key, lang), [lang]);
 }

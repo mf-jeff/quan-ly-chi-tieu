@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { transactionApi } from "@/lib/api";
-import { useTransactions } from "@/lib/hooks";
 import { formatShortVND, formatVND } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";

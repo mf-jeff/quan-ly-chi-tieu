@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { PieChart as PieChartIcon, Filter, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, ArrowRightLeft, Wallet } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import { useTransactions, useCategories, usePayers, useMonthComparison } from "@/lib/hooks";
@@ -69,27 +69,32 @@ export default function StatisticsPage() {
     return true;
   });
 
-  const expByCat: Record<string, { name: string; color: string; icon: string; amount: number }> = {};
-  txs.filter((t) => t.type === "expense").forEach((t) => {
-    if (!expByCat[t.categoryId]) expByCat[t.categoryId] = { name: t.category.name, color: t.category.color, icon: t.category.icon, amount: 0 };
-    expByCat[t.categoryId].amount += t.amount;
-  });
-  const totalExpense = Object.values(expByCat).reduce((s, v) => s + v.amount, 0);
-  const catSummary = Object.entries(expByCat)
-    .map(([id, d]) => ({ id, ...d, pct: totalExpense > 0 ? Math.round((d.amount / totalExpense) * 1000) / 10 : 0 }))
-    .sort((a, b) => b.amount - a.amount);
-  const topCat = catSummary[0];
+  const { catSummary, totalExpense, topCat, dailyData, weeklyData, topExpenses, avgDaily } = useMemo(() => {
+    const expByCat: Record<string, { name: string; color: string; icon: string; amount: number }> = {};
+    txs.filter((t) => t.type === "expense").forEach((t) => {
+      if (!expByCat[t.categoryId]) expByCat[t.categoryId] = { name: t.category.name, color: t.category.color, icon: t.category.icon, amount: 0 };
+      expByCat[t.categoryId].amount += t.amount;
+    });
+    const te = Object.values(expByCat).reduce((s, v) => s + v.amount, 0);
+    const cs = Object.entries(expByCat)
+      .map(([id, d]) => ({ id, ...d, pct: te > 0 ? Math.round((d.amount / te) * 1000) / 10 : 0 }))
+      .sort((a, b) => b.amount - a.amount);
 
-  const dailyMap: Record<string, { income: number; expense: number }> = {};
-  txs.forEach((tx) => { const key = format(new Date(tx.date), "dd/MM"); if (!dailyMap[key]) dailyMap[key] = { income: 0, expense: 0 }; dailyMap[key][tx.type as "income" | "expense"] += tx.amount; });
-  const dailyData = Object.entries(dailyMap).map(([date, d]) => ({ date, ...d })).sort((a, b) => { const [da, ma] = a.date.split("/").map(Number); const [db, mb] = b.date.split("/").map(Number); return ma !== mb ? ma - mb : da - db; });
+    const dailyMap: Record<string, { income: number; expense: number }> = {};
+    txs.forEach((tx) => { const key = format(new Date(tx.date), "dd/MM"); if (!dailyMap[key]) dailyMap[key] = { income: 0, expense: 0 }; dailyMap[key][tx.type as "income" | "expense"] += tx.amount; });
+    const dd = Object.entries(dailyMap).map(([date, d]) => ({ date, ...d })).sort((a, b) => { const [da, ma] = a.date.split("/").map(Number); const [db, mb] = b.date.split("/").map(Number); return ma !== mb ? ma - mb : da - db; });
 
-  const weekMap: Record<string, { income: number; expense: number }> = {};
-  txs.forEach((tx) => { const w = `W${Math.ceil(new Date(tx.date).getDate() / 7)}`; if (!weekMap[w]) weekMap[w] = { income: 0, expense: 0 }; weekMap[w][tx.type as "income" | "expense"] += tx.amount; });
-  const weeklyData = Object.entries(weekMap).map(([week, d]) => ({ week, ...d })).sort((a, b) => a.week.localeCompare(b.week));
+    const weekMap: Record<string, { income: number; expense: number }> = {};
+    txs.forEach((tx) => { const w = `W${Math.ceil(new Date(tx.date).getDate() / 7)}`; if (!weekMap[w]) weekMap[w] = { income: 0, expense: 0 }; weekMap[w][tx.type as "income" | "expense"] += tx.amount; });
+    const wd = Object.entries(weekMap).map(([week, d]) => ({ week, ...d })).sort((a, b) => a.week.localeCompare(b.week));
 
-  const topExpenses = [...txs].filter((t) => t.type === "expense").sort((a, b) => b.amount - a.amount).slice(0, 5);
-  const avgDaily = dailyData.length > 0 ? totalExpense / dailyData.length : 0;
+    return {
+      catSummary: cs, totalExpense: te, topCat: cs[0],
+      dailyData: dd, weeklyData: wd,
+      topExpenses: [...txs].filter((t) => t.type === "expense").sort((a, b) => b.amount - a.amount).slice(0, 5),
+      avgDaily: dd.length > 0 ? te / dd.length : 0,
+    };
+  }, [txs]);
 
   return (
     <div className="p-4 lg:p-8 max-w-7xl mx-auto space-y-6">
