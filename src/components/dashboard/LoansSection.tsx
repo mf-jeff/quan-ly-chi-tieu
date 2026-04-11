@@ -1,90 +1,133 @@
 "use client";
 
 import { useState } from "react";
-import { HandCoins, Plus, Trash2, Pencil, X, CheckCircle2, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { HandCoins, Plus, Trash2, Pencil, CheckCircle2, Clock, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useLoans, useAddLoan, useUpdateLoan, useDeleteLoan } from "@/lib/hooks";
 import { formatVND, formatDateVN } from "@/lib/utils";
 import type { LoanData } from "@/lib/api";
 
-export default function LoansSection() {
-  const { data, isLoading } = useLoans();
+function LoanForm({ type, onSubmit, onCancel, editData, isPending }: {
+  type: "lend" | "borrow";
+  onSubmit: (data: Record<string, unknown>) => void;
+  onCancel: () => void;
+  editData?: LoanData | null;
+  isPending: boolean;
+}) {
+  const [lender, setLender] = useState(editData?.lender || "");
+  const [borrower, setBorrower] = useState(editData?.borrower || "");
+  const [amount, setAmount] = useState(editData?.amount.toString() || "");
+  const [rate, setRate] = useState(editData?.interestRate?.toString() || "");
+  const [date, setDate] = useState(editData?.date ? editData.date.slice(0, 10) : "");
+  const [dueDate, setDueDate] = useState(editData?.dueDate ? editData.dueDate.slice(0, 10) : "");
+  const [note, setNote] = useState(editData?.note || "");
+
+  return (
+    <div className="mt-3 pt-3 border-t border-border space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        <input type="text" value={lender} onChange={(e) => setLender(e.target.value)}
+          placeholder={type === "lend" ? "Bạn (người cho vay)" : "Người cho vay"}
+          className="px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none" />
+        <input type="text" value={borrower} onChange={(e) => setBorrower(e.target.value)}
+          placeholder={type === "lend" ? "Người vay" : "Bạn (người vay)"}
+          className="px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none" />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Số tiền"
+          className="px-3 py-2.5 bg-muted-bg border border-border rounded-xl text-sm font-semibold text-foreground placeholder:text-muted focus:outline-none" />
+        <input type="number" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="Lãi suất %/năm"
+          className="px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none" />
+      </div>
+      {amount && Number(amount) > 0 && <p className="text-xs text-muted">{formatVND(Number(amount))}</p>}
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs text-muted mb-1 block">{type === "lend" ? "Ngày cho vay" : "Ngày vay"}</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+            className="w-full px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none" />
+        </div>
+        <div>
+          <label className="text-xs text-muted mb-1 block">Ngày trả (dự kiến)</label>
+          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
+            className="w-full px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none" />
+        </div>
+      </div>
+      <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ghi chú"
+        className="w-full px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none" />
+      <div className="flex gap-2">
+        <button onClick={() => { if (!lender.trim() || !borrower.trim() || !amount) return; onSubmit({ type, lender: lender.trim(), borrower: borrower.trim(), amount: Number(amount), interestRate: rate ? Number(rate) : null, date: date || undefined, dueDate: dueDate || undefined, note: note || null }); }}
+          disabled={isPending}
+          className={`flex-1 py-2 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 ${type === "lend" ? "bg-danger hover:bg-danger/90" : "bg-warning hover:bg-warning/90"}`}>
+          {editData ? "Lưu" : "Thêm"}
+        </button>
+        <button onClick={onCancel} className="px-4 py-2 bg-muted-bg text-muted text-sm rounded-xl">Hủy</button>
+      </div>
+    </div>
+  );
+}
+
+function LoanCard({ loan, onEdit, onTogglePaid, onDelete }: {
+  loan: LoanData; onEdit: () => void; onTogglePaid: () => void; onDelete: () => void;
+}) {
+  const daysLeft = loan.dueDate ? Math.ceil((new Date(loan.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+  const isOverdue = daysLeft !== null && daysLeft < 0 && !loan.isPaid;
+
+  return (
+    <div className={`p-3 rounded-xl border ${loan.isPaid ? "border-accent/30 bg-accent/5" : isOverdue ? "border-danger/30 bg-danger/5" : "border-border"}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-card-foreground">{loan.lender} → {loan.borrower}</p>
+            {loan.isPaid && <span className="text-xs bg-accent/10 text-accent px-1.5 py-0.5 rounded">Đã trả</span>}
+            {isOverdue && <span className="text-xs bg-danger/10 text-danger px-1.5 py-0.5 rounded">Quá hạn</span>}
+          </div>
+          <div className="flex flex-wrap gap-x-3 mt-1 text-xs text-muted">
+            {loan.interestRate && <span>Lãi: {loan.interestRate}%/năm</span>}
+            <span>{formatDateVN(loan.date)}</span>
+            {loan.dueDate && <span className="flex items-center gap-0.5"><Clock className="w-3 h-3" />Hạn: {formatDateVN(loan.dueDate)}{daysLeft !== null && daysLeft > 0 && !loan.isPaid && ` (${daysLeft} ngày)`}</span>}
+          </div>
+          {loan.note && <p className="text-xs text-muted mt-1 italic">{loan.note}</p>}
+        </div>
+        <div className="flex items-center gap-1.5 ml-3">
+          <span className="text-sm font-bold text-card-foreground">{formatVND(loan.amount)}</span>
+          {!loan.isPaid && <button onClick={onTogglePaid} className="p-1 text-muted hover:text-accent rounded-lg" title="Đã trả"><CheckCircle2 className="w-4 h-4" /></button>}
+          <button onClick={onEdit} className="p-1 text-muted hover:text-primary-light rounded-lg"><Pencil className="w-3.5 h-3.5" /></button>
+          <button onClick={onDelete} className="p-1 text-muted hover:text-danger rounded-lg"><Trash2 className="w-3.5 h-3.5" /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoanBlock({ type, icon: Icon, color, title, loans, totalUnpaid }: {
+  type: "lend" | "borrow"; icon: typeof HandCoins; color: string; title: string;
+  loans: LoanData[]; totalUnpaid: number;
+}) {
   const addLoan = useAddLoan();
   const updateLoan = useUpdateLoan();
   const deleteLoan = useDeleteLoan();
 
-  const loans = data?.loans || [];
-  const totalLent = data?.totalLent || 0;
-  const unpaidLoans = loans.filter((l) => !l.isPaid);
-  const paidLoans = loans.filter((l) => l.isPaid);
-
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<LoanData | null>(null);
 
-  // Form
-  const [lender, setLender] = useState("");
-  const [borrower, setBorrower] = useState("");
-  const [amount, setAmount] = useState("");
-  const [rate, setRate] = useState("");
-  const [date, setDate] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [note, setNote] = useState("");
-
-  function resetForm() {
-    setLender(""); setBorrower(""); setAmount(""); setRate("");
-    setDate(""); setDueDate(""); setNote("");
-  }
-
-  function openEdit(loan: LoanData) {
-    setEditId(loan.id);
-    setLender(loan.lender);
-    setBorrower(loan.borrower);
-    setAmount(loan.amount.toString());
-    setRate(loan.interestRate?.toString() || "");
-    setDate(loan.date ? loan.date.slice(0, 10) : "");
-    setDueDate(loan.dueDate ? loan.dueDate.slice(0, 10) : "");
-    setNote(loan.note || "");
-    setShowAdd(true);
-  }
-
-  function handleSubmit() {
-    if (!lender.trim() || !borrower.trim() || !amount) return;
-    const payload = {
-      lender: lender.trim(),
-      borrower: borrower.trim(),
-      amount: Number(amount),
-      interestRate: rate ? Number(rate) : null,
-      date: date || undefined,
-      dueDate: dueDate || undefined,
-      note: note || null,
-    };
-
-    if (editId) {
-      updateLoan.mutate({ id: editId, data: payload }, { onSuccess: () => { setShowAdd(false); setEditId(null); resetForm(); } });
-    } else {
-      addLoan.mutate(payload, { onSuccess: () => { setShowAdd(false); resetForm(); } });
-    }
-  }
-
-  if (isLoading) return null;
+  const unpaid = loans.filter((l) => !l.isPaid).length;
+  const paid = loans.filter((l) => l.isPaid).length;
 
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
-      {/* Header */}
       <div className="flex items-center justify-between p-5 cursor-pointer" onClick={() => setExpanded(!expanded)}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-danger/10 flex items-center justify-center">
-            <HandCoins className="w-5 h-5 text-danger" />
+          <div className={`w-10 h-10 rounded-xl ${color}/10 flex items-center justify-center`} style={{ backgroundColor: `var(--${color.replace("text-", "")})10` }}>
+            <Icon className={`w-5 h-5 ${color}`} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-card-foreground">Cho vay</p>
-            <p className="text-xs text-muted">{unpaidLoans.length} chưa trả · {paidLoans.length} đã trả</p>
+            <p className="text-sm font-semibold text-card-foreground">{title}</p>
+            <p className="text-xs text-muted">{unpaid} chưa trả · {paid} đã trả</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-lg font-bold text-danger">{formatVND(totalLent)}</p>
-            <p className="text-xs text-muted">chưa thu</p>
+            <p className={`text-lg font-bold ${color}`}>{formatVND(totalUnpaid)}</p>
+            <p className="text-xs text-muted">{type === "lend" ? "chưa thu" : "còn nợ"}</p>
           </div>
           {expanded ? <ChevronUp className="w-4 h-4 text-muted" /> : <ChevronDown className="w-4 h-4 text-muted" />}
         </div>
@@ -92,108 +135,55 @@ export default function LoansSection() {
 
       {expanded && (
         <div className="px-5 pb-5 space-y-2">
-          {/* Loan list */}
           {loans.length > 0 && (
             <div className="border-t border-border pt-3 space-y-2">
-              {loans.map((loan) => {
-                const daysLeft = loan.dueDate ? Math.ceil((new Date(loan.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
-                const isOverdue = daysLeft !== null && daysLeft < 0 && !loan.isPaid;
-
-                return (
-                  <div key={loan.id} className={`p-3 rounded-xl border ${loan.isPaid ? "border-accent/30 bg-accent/5" : isOverdue ? "border-danger/30 bg-danger/5" : "border-border"}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-card-foreground">
-                            {loan.lender} → {loan.borrower}
-                          </p>
-                          {loan.isPaid && <span className="text-xs bg-accent/10 text-accent px-1.5 py-0.5 rounded">Đã trả</span>}
-                          {isOverdue && <span className="text-xs bg-danger/10 text-danger px-1.5 py-0.5 rounded">Quá hạn</span>}
-                        </div>
-                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted">
-                          {loan.interestRate && <span>Lãi: {loan.interestRate}%/năm</span>}
-                          <span>{formatDateVN(loan.date)}</span>
-                          {loan.dueDate && (
-                            <span className="flex items-center gap-0.5">
-                              <Clock className="w-3 h-3" />
-                              Hạn: {formatDateVN(loan.dueDate)}
-                              {daysLeft !== null && daysLeft > 0 && !loan.isPaid && ` (${daysLeft} ngày)`}
-                            </span>
-                          )}
-                        </div>
-                        {loan.note && <p className="text-xs text-muted mt-1 italic">{loan.note}</p>}
-                      </div>
-                      <div className="flex items-center gap-2 ml-3">
-                        <span className="text-sm font-bold text-card-foreground">{formatVND(loan.amount)}</span>
-                        {!loan.isPaid && (
-                          <button onClick={(e) => { e.stopPropagation(); updateLoan.mutate({ id: loan.id, data: { isPaid: true } }); }}
-                            className="p-1 text-muted hover:text-accent rounded-lg transition-colors" title="Đánh dấu đã trả">
-                            <CheckCircle2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button onClick={(e) => { e.stopPropagation(); openEdit(loan); }}
-                          className="p-1 text-muted hover:text-primary-light rounded-lg transition-colors">
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={(e) => { e.stopPropagation(); deleteLoan.mutate(loan.id); }}
-                          className="p-1 text-muted hover:text-danger rounded-lg transition-colors">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {loans.map((loan) => (
+                <LoanCard key={loan.id} loan={loan}
+                  onEdit={() => { setEditData(loan); setShowAdd(true); }}
+                  onTogglePaid={() => updateLoan.mutate({ id: loan.id, data: { isPaid: true } })}
+                  onDelete={() => deleteLoan.mutate(loan.id)} />
+              ))}
             </div>
           )}
 
-          {/* Add/Edit form */}
           {showAdd ? (
-            <div className="mt-3 pt-3 border-t border-border space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <input type="text" value={lender} onChange={(e) => setLender(e.target.value)} placeholder="Người cho vay"
-                  className="px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none" />
-                <input type="text" value={borrower} onChange={(e) => setBorrower(e.target.value)} placeholder="Người vay"
-                  className="px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none" />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Số tiền"
-                  className="px-3 py-2.5 bg-muted-bg border border-border rounded-xl text-sm font-semibold text-foreground placeholder:text-muted focus:outline-none" />
-                <input type="number" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="Lãi suất %/năm"
-                  className="px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none" />
-              </div>
-              {amount && Number(amount) > 0 && <p className="text-xs text-muted">{formatVND(Number(amount))}</p>}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs text-muted mb-1 block">Ngày cho vay</label>
-                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none" />
-                </div>
-                <div>
-                  <label className="text-xs text-muted mb-1 block">Ngày trả (dự kiến)</label>
-                  <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none" />
-                </div>
-              </div>
-              <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ghi chú"
-                className="w-full px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none" />
-              <div className="flex gap-2">
-                <button onClick={handleSubmit} disabled={addLoan.isPending || updateLoan.isPending}
-                  className="flex-1 py-2 bg-danger text-white text-sm font-medium rounded-xl hover:bg-danger/90 transition-colors disabled:opacity-50">
-                  {editId ? "Lưu" : "Thêm"}
-                </button>
-                <button onClick={() => { setShowAdd(false); setEditId(null); resetForm(); }}
-                  className="px-4 py-2 bg-muted-bg text-muted text-sm rounded-xl">Hủy</button>
-              </div>
-            </div>
+            <LoanForm type={type} editData={editData} isPending={addLoan.isPending || updateLoan.isPending}
+              onSubmit={(data) => {
+                if (editData) {
+                  updateLoan.mutate({ id: editData.id, data }, { onSuccess: () => { setShowAdd(false); setEditData(null); } });
+                } else {
+                  addLoan.mutate(data, { onSuccess: () => { setShowAdd(false); } });
+                }
+              }}
+              onCancel={() => { setShowAdd(false); setEditData(null); }} />
           ) : (
-            <button onClick={() => { resetForm(); setEditId(null); setShowAdd(true); }}
-              className="flex items-center gap-2 w-full p-2.5 rounded-xl border border-dashed border-border hover:border-danger text-muted hover:text-danger transition-colors text-sm">
-              <Plus className="w-4 h-4" /> Thêm khoản vay
+            <button onClick={() => { setEditData(null); setShowAdd(true); }}
+              className={`flex items-center gap-2 w-full p-2.5 rounded-xl border border-dashed border-border hover:border-current ${color} text-muted hover:${color} transition-colors text-sm`}>
+              <Plus className="w-4 h-4" /> Thêm {type === "lend" ? "khoản cho vay" : "khoản vay"}
             </button>
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+export default function LoansSection() {
+  const { data, isLoading } = useLoans();
+  if (isLoading) return null;
+
+  const loans = data?.loans || [];
+  const lendLoans = loans.filter((l) => l.type === "lend");
+  const borrowLoans = loans.filter((l) => l.type === "borrow");
+  const totalLentUnpaid = lendLoans.filter((l) => !l.isPaid).reduce((s, l) => s + l.amount, 0);
+  const totalBorrowUnpaid = borrowLoans.filter((l) => !l.isPaid).reduce((s, l) => s + l.amount, 0);
+
+  return (
+    <div className="space-y-4">
+      <LoanBlock type="lend" icon={ArrowUpRight} color="text-danger" title="Cho vay"
+        loans={lendLoans} totalUnpaid={totalLentUnpaid} />
+      <LoanBlock type="borrow" icon={ArrowDownRight} color="text-warning" title="Đi vay"
+        loans={borrowLoans} totalUnpaid={totalBorrowUnpaid} />
     </div>
   );
 }

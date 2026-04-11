@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   const payload = await getUserFromRequest(req);
   if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { lender, borrower, amount, interestRate, date, dueDate, note } = await req.json();
+  const { type, lender, borrower, amount, interestRate, date, dueDate, note } = await req.json();
 
   if (!lender || !borrower || !amount) {
     return NextResponse.json({ error: "Người cho vay, người vay và số tiền là bắt buộc" }, { status: 400 });
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
   const loan = await prisma.loan.create({
     data: {
       userId: payload.userId,
+      type: type || "lend",
       lender,
       borrower,
       amount: Number(amount),

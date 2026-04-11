@@ -151,7 +151,7 @@ export const savingsApi = {
 
 // Loans
 export interface LoanData {
-  id: string; lender: string; borrower: string; amount: number;
+  id: string; type: string; lender: string; borrower: string; amount: number;
   interestRate: number | null; date: string; dueDate: string | null;
   isPaid: boolean; note: string | null; createdAt: string;
 }

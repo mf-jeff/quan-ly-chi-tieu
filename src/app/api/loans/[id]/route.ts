@@ -18,6 +18,7 @@ export async function PUT(
   const loan = await prisma.loan.update({
     where: { id },
     data: {
+      type: body.type,
       lender: body.lender,
       borrower: body.borrower,
       amount: body.amount !== undefined ? Number(body.amount) : undefined,

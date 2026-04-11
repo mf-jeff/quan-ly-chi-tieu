@@ -124,6 +124,7 @@ model SavingsItem {
 model Loan {
   id           String    @id @default(cuid())
   userId       String    @map("user_id")
+  type         String    @default("lend") // "lend" = cho vay, "borrow" = đi vay
   lender       String    // người cho vay
   borrower     String    // người vay
   amount       Float     // số tiền
