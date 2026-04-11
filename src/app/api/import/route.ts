@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
             const created = await prisma.category.upsert({
               where: { userId_name: { userId: payload.userId, name: catName } },
               update: {},
-              create: { userId: payload.userId, name: catName, type: "expense" },
+              create: { userId: payload.userId, name: catName, type },
             });
             catMap[rawCatLower] = created.id;
             if (!catMap[rawCatLower + "_counted"]) {

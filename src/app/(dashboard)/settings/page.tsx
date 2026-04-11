@@ -21,7 +21,7 @@ import {
 import { useTheme } from "@/components/ThemeProvider";
 import { useAuth } from "@/lib/auth-store";
 import { useSettings, currencies, languages } from "@/lib/settings-store";
-import { exportApi } from "@/lib/api";
+import { exportApi, getToken } from "@/lib/api";
 import { useUpdateUserSettings, usePayers, useAddPayer, useUpdatePayer, useDeletePayer } from "@/lib/hooks";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
@@ -68,7 +68,7 @@ export default function SettingsPage() {
   async function saveProfile() {
     setProfileSaving(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = getToken();
       const res = await fetch("/api/user/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -90,7 +90,7 @@ export default function SettingsPage() {
     if (newPass !== confirmPass) { toast.error("Mật khẩu xác nhận không khớp"); return; }
     setPassSaving(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = getToken();
       const res = await fetch("/api/user/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },

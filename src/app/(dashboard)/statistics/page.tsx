@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PieChart as PieChartIcon, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
-import { useTransactions, useCategories } from "@/lib/hooks";
+import { useTransactions, useCategories, usePayers } from "@/lib/hooks";
 import { formatVND, formatShortVND } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { format } from "date-fns";
@@ -30,6 +30,7 @@ export default function StatisticsPage() {
   const endDate = new Date(year, month, 0, 23, 59, 59).toISOString();
   const { data } = useTransactions({ startDate, endDate, limit: "9999" });
   const { data: catData } = useCategories();
+  const { data: payerData } = usePayers();
   const t = useT();
   const [filterCat, setFilterCat] = useState("all");
   const [filterPayer, setFilterPayer] = useState("all");
@@ -40,9 +41,7 @@ export default function StatisticsPage() {
 
   const allTxs = data?.transactions || [];
   const categories = catData?.categories || [];
-
-  // Get unique payers
-  const allPayers = [...new Set(allTxs.map((tx) => tx.payer).filter(Boolean))];
+  const allPayers = payerData?.payers || [];
 
   // Apply filters
   const txs = allTxs.filter((tx) => {
@@ -106,7 +105,7 @@ export default function StatisticsPage() {
           <select value={filterPayer} onChange={(e) => setFilterPayer(e.target.value)}
             className="bg-muted-bg border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none">
             <option value="all">Tất cả người</option>
-            {allPayers.map((p) => <option key={p} value={p}>{p}</option>)}
+            {allPayers.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
           </select>
           {(filterCat !== "all" || filterPayer !== "all") && (
             <button onClick={() => { setFilterCat("all"); setFilterPayer("all"); }}
