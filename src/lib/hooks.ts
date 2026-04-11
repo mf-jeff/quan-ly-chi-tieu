@@ -248,10 +248,10 @@ export function useDeletePayer() {
 
 // --- Statistics ---
 
-export function useMonthComparison(month: number, year: number) {
+export function useMonthComparison(month: number, year: number, compareMonth?: number, compareYear?: number) {
   return useQuery({
-    queryKey: ["comparison", month, year],
-    queryFn: () => statisticsApi.compare(month, year),
+    queryKey: ["comparison", month, year, compareMonth, compareYear],
+    queryFn: () => statisticsApi.compare(month, year, compareMonth, compareYear),
   });
 }
 

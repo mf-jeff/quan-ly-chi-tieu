@@ -9,14 +9,16 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const month = Number(url.searchParams.get("month")) || new Date().getMonth() + 1;
   const year = Number(url.searchParams.get("year")) || new Date().getFullYear();
+  const compareMonth = Number(url.searchParams.get("compareMonth")) || (month === 1 ? 12 : month - 1);
+  const compareYear = Number(url.searchParams.get("compareYear")) || (month === 1 ? year - 1 : year);
 
   // Current month range
   const curStart = new Date(year, month - 1, 1);
   const curEnd = new Date(year, month, 0, 23, 59, 59);
 
-  // Previous month range
-  const prevMonth = month === 1 ? 12 : month - 1;
-  const prevYear = month === 1 ? year - 1 : year;
+  // Compare month range
+  const prevMonth = compareMonth;
+  const prevYear = compareYear;
   const prevStart = new Date(prevYear, prevMonth - 1, 1);
   const prevEnd = new Date(prevYear, prevMonth, 0, 23, 59, 59);
 

@@ -225,6 +225,10 @@ export interface ComparisonData {
 }
 
 export const statisticsApi = {
-  compare: (month: number, year: number) =>
-    request<ComparisonData>(`/statistics/compare?month=${month}&year=${year}`),
+  compare: (month: number, year: number, compareMonth?: number, compareYear?: number) => {
+    const params = new URLSearchParams({ month: month.toString(), year: year.toString() });
+    if (compareMonth) params.set("compareMonth", compareMonth.toString());
+    if (compareYear) params.set("compareYear", compareYear.toString());
+    return request<ComparisonData>(`/statistics/compare?${params}`);
+  },
 };
