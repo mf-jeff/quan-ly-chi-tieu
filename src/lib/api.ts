@@ -155,11 +155,18 @@ export const exportApi = {
     const params = new URLSearchParams({ format });
     if (startDate) params.set("startDate", startDate);
     if (endDate) params.set("endDate", endDate);
+    // Build filename from date
+    let fileName = "giao-dich";
+    if (startDate) {
+      const d = new Date(startDate);
+      fileName = `giao dich thang ${d.getMonth() + 1} nam ${d.getFullYear()}`;
+    }
+
     const blob = await request<Blob>(`/export?${params}`);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `giao-dich.${format}`;
+    a.download = `${fileName}.${format}`;
     a.click();
     URL.revokeObjectURL(url);
   },
