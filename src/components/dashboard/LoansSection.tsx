@@ -95,6 +95,8 @@ function LoanBlock({ type, icon: Icon, color, title, loans, totalUnpaid }: {
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
   const [editPaymentAmount, setEditPaymentAmount] = useState("");
   const [editPaymentNote, setEditPaymentNote] = useState("");
+  const [editPaidId, setEditPaidId] = useState<string | null>(null);
+  const [editPaidAmount, setEditPaidAmount] = useState("");
 
   const unpaid = loans.filter((l) => !l.isPaid).length;
   const paid = loans.filter((l) => l.isPaid).length;
@@ -187,17 +189,48 @@ function LoanBlock({ type, icon: Icon, color, title, loans, totalUnpaid }: {
                                   <div className="flex items-center gap-1.5 flex-wrap">
                                     <span className="text-sm font-semibold text-card-foreground">{formatVND(loan.amount)}</span>
                                     {loan.paidAmount > 0 && !loan.isPaid && (
-                                      <span className="text-[10px] bg-primary-light/10 text-primary-light px-1 py-0.5 rounded">
-                                        Đã trả {formatVND(loan.paidAmount)} · Còn {formatVND(loan.amount - loan.paidAmount)}
-                                      </span>
+                                      <button onClick={() => { setEditPaidId(editPaidId === loan.id ? null : loan.id); setEditPaidAmount(loan.paidAmount.toString()); }}
+                                        className="text-[10px] bg-primary-light/10 text-primary-light px-1 py-0.5 rounded hover:bg-primary-light/20 transition-colors cursor-pointer"
+                                        title="Bấm để chỉnh sửa số tiền đã trả">
+                                        Đã trả {formatVND(loan.paidAmount)} · Còn {formatVND(loan.amount - loan.paidAmount)} ✏️
+                                      </button>
                                     )}
-                                    {loan.isPaid && <span className="text-[10px] bg-accent/10 text-accent px-1 py-0.5 rounded">Đã trả hết</span>}
+                                    {loan.isPaid && (
+                                      <button onClick={() => { setEditPaidId(editPaidId === loan.id ? null : loan.id); setEditPaidAmount(loan.paidAmount.toString()); }}
+                                        className="text-[10px] bg-accent/10 text-accent px-1 py-0.5 rounded hover:bg-accent/20 transition-colors cursor-pointer"
+                                        title="Bấm để chỉnh sửa">
+                                        Đã trả hết ✏️
+                                      </button>
+                                    )}
                                     {isOverdue && <span className="text-[10px] bg-danger/10 text-danger px-1 py-0.5 rounded">Quá hạn</span>}
                                   </div>
                                   {/* Progress bar */}
                                   {loan.paidAmount > 0 && !loan.isPaid && (
                                     <div className="h-1.5 bg-muted-bg rounded-full overflow-hidden mt-1.5 w-full max-w-[200px]">
                                       <div className="h-full rounded-full bg-accent" style={{ width: `${Math.min(100, (loan.paidAmount / loan.amount) * 100)}%` }} />
+                                    </div>
+                                  )}
+                                  {/* Edit paid amount inline */}
+                                  {editPaidId === loan.id && (
+                                    <div className="flex items-center gap-2 mt-2 flex-wrap p-2 bg-primary-light/5 rounded-lg border border-primary-light/20">
+                                      <span className="text-xs text-primary-light font-medium">Số tiền đã trả:</span>
+                                      <input type="number" value={editPaidAmount} onChange={(e) => setEditPaidAmount(e.target.value)}
+                                        autoFocus
+                                        className="px-2 py-1.5 bg-muted-bg border border-border rounded-lg text-xs w-32 text-foreground placeholder:text-muted focus:outline-none" />
+                                      <button onClick={() => {
+                                        const val = Number(editPaidAmount);
+                                        if (val < 0) return;
+                                        const fullyPaid = val >= loan.amount;
+                                        updateLoan.mutate({ id: loan.id, data: { paidAmount: val, isPaid: fullyPaid } });
+                                        setEditPaidId(null); setEditPaidAmount("");
+                                      }} className="px-2 py-1.5 bg-primary-light text-white text-xs rounded-lg font-medium">Lưu</button>
+                                      {loan.isPaid && (
+                                        <button onClick={() => {
+                                          updateLoan.mutate({ id: loan.id, data: { paidAmount: 0, isPaid: false } });
+                                          setEditPaidId(null); setEditPaidAmount("");
+                                        }} className="px-2 py-1.5 bg-warning/10 text-warning text-xs rounded-lg">Hoàn tác</button>
+                                      )}
+                                      <button onClick={() => { setEditPaidId(null); setEditPaidAmount(""); }} className="px-2 py-1.5 text-xs text-muted">Hủy</button>
                                     </div>
                                   )}
                                   <div className="flex flex-wrap gap-x-2 mt-0.5 text-[11px] text-muted">
