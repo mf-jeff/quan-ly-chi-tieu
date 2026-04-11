@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X,
   Moon,
   Sun,
   LogOut,
@@ -39,20 +38,55 @@ export default function Sidebar() {
   const { logout } = useAuth();
   const tr = useT();
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
 
   return (
     <>
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-sidebar h-12 flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
+        <button onClick={() => setMobileMenu(!mobileMenu)} className="flex items-center gap-2">
           <VaultLogo size={24} className="text-warning" />
           <span className="text-warning font-extrabold text-lg">Vault</span>
-        </div>
+          <Menu className="w-5 h-5 text-sidebar-foreground/60" />
+        </button>
         <button onClick={() => window.location.reload()} className="p-2 text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Mobile menu overlay */}
+      {mobileMenu && (
+        <div className="lg:hidden fixed inset-0 z-40" onClick={() => setMobileMenu(false)}>
+          <div className="absolute top-12 left-0 right-0">
+            <div className="mx-3 mt-1 bg-sidebar border border-white/10 rounded-2xl shadow-2xl p-2 animate-scale-in">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link key={item.href} href={item.href} onClick={() => setMobileMenu(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                      isActive ? "bg-gradient-to-r from-primary to-primary-light/80 text-white" : "text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground"
+                    }`}>
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">{tr(item.labelKey)}</span>
+                  </Link>
+                );
+              })}
+              <div className="border-t border-white/10 mt-1 pt-1">
+                <button onClick={() => { toggleTheme(); setMobileMenu(false); }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-sidebar-foreground/70 hover:bg-sidebar-hover transition-colors">
+                  {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  <span className="text-sm font-medium">{theme === "dark" ? tr("settings.light") : tr("settings.dark")}</span>
+                </button>
+                <button onClick={logout}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-sidebar-foreground/70 hover:bg-danger/20 hover:text-danger transition-colors">
+                  <LogOut className="w-5 h-5" />
+                  <span className="text-sm font-medium">{tr("settings.logout")}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Sidebar */}
       <aside
@@ -80,7 +114,7 @@ export default function Sidebar() {
             <Link
               key={item.labelKey}
               href={item.href}
-              onClick={() => setMobileOpen(false)}
+              onClick={() => setMobileMenu(false)}
               className={`
                 flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all relative
                 ${
