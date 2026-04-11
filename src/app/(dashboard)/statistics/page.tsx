@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PieChart as PieChartIcon, Filter, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, ArrowRightLeft } from "lucide-react";
+import { PieChart as PieChartIcon, Filter, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, ArrowRightLeft, Wallet } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import { useTransactions, useCategories, usePayers, useMonthComparison } from "@/lib/hooks";
 import { formatVND, formatShortVND } from "@/lib/utils";
@@ -60,6 +60,11 @@ export default function StatisticsPage() {
   const categories = catData?.categories || [];
   const allPayers = payerData?.payers || [];
 
+  // Month totals (unfiltered)
+  const monthIncome = allTxs.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const monthExpense = allTxs.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  const monthBalance = monthIncome - monthExpense;
+
   // Apply filters
   const txs = allTxs.filter((tx) => {
     if (filterCat !== "all" && tx.categoryId !== filterCat) return false;
@@ -108,6 +113,38 @@ export default function StatisticsPage() {
         <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
           <ChevronRight className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-primary-light">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-muted text-xs">Số dư</span>
+            <Wallet className="w-4 h-4 text-primary-light" />
+          </div>
+          <p className={`text-lg font-bold ${monthBalance >= 0 ? "text-card-foreground" : "text-danger"}`}>{formatVND(monthBalance)}</p>
+        </div>
+        <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-accent">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-muted text-xs">Thu nhập</span>
+            <TrendingUp className="w-4 h-4 text-accent" />
+          </div>
+          <p className="text-lg font-bold text-accent">{formatVND(monthIncome)}</p>
+        </div>
+        <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-danger">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-muted text-xs">Chi tiêu</span>
+            <TrendingDown className="w-4 h-4 text-danger" />
+          </div>
+          <p className="text-lg font-bold text-danger">{formatVND(monthExpense)}</p>
+        </div>
+        <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-warning">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-muted text-xs">Giao dịch</span>
+            <ArrowRightLeft className="w-4 h-4 text-warning" />
+          </div>
+          <p className="text-lg font-bold text-card-foreground">{allTxs.length}</p>
+        </div>
       </div>
 
       {/* Filters */}
