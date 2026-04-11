@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Plus, Trash2, Palette } from "lucide-react";
+import { X, Plus, Trash2, Palette, Merge } from "lucide-react";
 import { useCategories, useAddCategory, useDeleteCategory } from "@/lib/hooks";
 import { categoryApi, getToken } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,6 +47,7 @@ export default function CategoryManager({ open, onClose }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState<"color" | "icon" | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string; txCount: number } | null>(null);
+  const [mergeConfirm, setMergeConfirm] = useState<{ id: string; name: string; txCount: number } | null>(null);
   const [moveToId, setMoveToId] = useState("");
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("Tag");
@@ -103,6 +104,10 @@ export default function CategoryManager({ open, onClose }: Props) {
                   <button onClick={() => { setEditingId(isEditing && editMode === "color" ? null : cat.id); setEditMode("color"); }}
                     className="p-2 text-muted hover:text-primary-light hover:bg-primary-light/10 rounded-lg transition-colors" title="Đổi màu">
                     <Palette className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => { setMergeConfirm({ id: cat.id, name: cat.name, txCount: cat._count.transactions }); setMoveToId(""); }}
+                    className="p-2 text-muted hover:text-warning hover:bg-warning/10 rounded-lg transition-colors" title="Gộp vào danh mục khác">
+                    <Merge className="w-4 h-4" />
                   </button>
                   <button onClick={async () => {
                     if (cat._count.transactions > 0) {
@@ -283,6 +288,58 @@ export default function CategoryManager({ open, onClose }: Props) {
                   }}
                   className="w-full py-2 text-xs text-danger hover:bg-danger/10 rounded-xl transition-colors">
                   Xóa tất cả {deleteConfirm.txCount} giao dịch &amp; xóa danh mục
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Merge confirmation dialog */}
+      {mergeConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMergeConfirm(null)} />
+          <div className="relative bg-card rounded-2xl border border-border shadow-2xl w-full max-w-sm">
+            <div className="p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+                  <Merge className="w-5 h-5 text-warning" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-card-foreground">Gộp &quot;{mergeConfirm.name}&quot;</p>
+                  <p className="text-xs text-muted">{mergeConfirm.txCount} giao dịch sẽ được chuyển sang danh mục đích</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-card-foreground mb-2 block">Gộp vào danh mục:</label>
+                <select value={moveToId} onChange={(e) => setMoveToId(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30">
+                  <option value="">-- Chọn danh mục đích --</option>
+                  {categories.filter((c) => c.id !== mergeConfirm.id).map((c) => (
+                    <option key={c.id} value={c.id}>{c.name} ({c._count.transactions} giao dịch)</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    if (!moveToId) { toast.error("Vui lòng chọn danh mục đích"); return; }
+                    try {
+                      await categoryApi.delete(mergeConfirm.id, moveToId);
+                      qc.invalidateQueries({ queryKey: ["categories"] });
+                      qc.invalidateQueries({ queryKey: ["transactions"] });
+                      toast.success(`Đã gộp ${mergeConfirm.txCount} giao dịch vào danh mục đích`);
+                      setMergeConfirm(null);
+                    } catch (e) { toast.error(e instanceof Error ? e.message : "Lỗi"); }
+                  }}
+                  disabled={!moveToId}
+                  className="flex-1 py-2.5 bg-warning text-white text-sm font-medium rounded-xl hover:bg-warning/90 transition-colors disabled:opacity-50">
+                  Gộp
+                </button>
+                <button onClick={() => setMergeConfirm(null)}
+                  className="px-4 py-2.5 bg-muted-bg text-muted text-sm rounded-xl hover:text-card-foreground transition-colors">
+                  Hủy
                 </button>
               </div>
             </div>
