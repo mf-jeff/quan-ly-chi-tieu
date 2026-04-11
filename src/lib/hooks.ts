@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { transactionApi, categoryApi, budgetApi, savingsApi, userSettingsApi, assetTypeApi, loanApi, payerApi } from "./api";
+import { transactionApi, categoryApi, budgetApi, savingsApi, userSettingsApi, assetTypeApi, loanApi, payerApi, statisticsApi } from "./api";
 import { useDateStore } from "./date-store";
 import { toast } from "sonner";
 
@@ -243,6 +243,15 @@ export function useDeletePayer() {
     mutationFn: payerApi.delete,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["payers"] }); toast.success("Đã xóa"); },
     onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// --- Statistics ---
+
+export function useMonthComparison(month: number, year: number) {
+  return useQuery({
+    queryKey: ["comparison", month, year],
+    queryFn: () => statisticsApi.compare(month, year),
   });
 }
 

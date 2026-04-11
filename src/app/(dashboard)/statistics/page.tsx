@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { PieChart as PieChartIcon, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { PieChart as PieChartIcon, Filter, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, ArrowRightLeft } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
-import { useTransactions, useCategories, usePayers } from "@/lib/hooks";
+import { useTransactions, useCategories, usePayers, useMonthComparison } from "@/lib/hooks";
 import { formatVND, formatShortVND } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { format } from "date-fns";
@@ -38,6 +38,8 @@ export default function StatisticsPage() {
   function prevMonth() { if (month === 1) { setMonth(12); setYear(year - 1); } else setMonth(month - 1); }
   function nextMonth() { if (month === 12) { setMonth(1); setYear(year + 1); } else setMonth(month + 1); }
   const monthNames = ["", "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+
+  const { data: compareData } = useMonthComparison(month, year);
 
   const allTxs = data?.transactions || [];
   const categories = catData?.categories || [];
@@ -183,6 +185,75 @@ export default function StatisticsPage() {
           </table>
         </div>
       </div>
+
+      {/* Month comparison */}
+      {compareData && (
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <ArrowRightLeft className="w-5 h-5 text-primary-light" />
+            <h3 className="text-lg font-semibold text-card-foreground">
+              So sánh T{month} với T{compareData.prevMonth}/{compareData.prevYear}
+            </h3>
+          </div>
+
+          {/* Total comparison */}
+          <div className="flex items-center justify-between p-4 rounded-xl bg-muted-bg/50 mb-4">
+            <div>
+              <p className="text-xs text-muted">T{compareData.prevMonth}</p>
+              <p className="text-lg font-bold text-card-foreground">{formatVND(compareData.totalPrevious)}</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${
+                compareData.totalDiff > 0 ? "bg-danger/10 text-danger" : compareData.totalDiff < 0 ? "bg-accent/10 text-accent" : "bg-muted-bg text-muted"
+              }`}>
+                {compareData.totalDiff > 0 ? <TrendingUp className="w-4 h-4" /> : compareData.totalDiff < 0 ? <TrendingDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
+                {compareData.totalDiff > 0 ? "+" : ""}{compareData.totalPct}%
+              </div>
+              <p className="text-[10px] text-muted mt-0.5">
+                {compareData.totalDiff > 0 ? `+${formatVND(compareData.totalDiff)}` : compareData.totalDiff < 0 ? formatVND(compareData.totalDiff) : "Không đổi"}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted">T{month}</p>
+              <p className="text-lg font-bold text-card-foreground">{formatVND(compareData.totalCurrent)}</p>
+            </div>
+          </div>
+
+          {/* Per-category comparison */}
+          <div className="space-y-2">
+            {compareData.categories.map((cat) => {
+              const CatIcon = getIcon(cat.icon);
+              const isMore = cat.diff > 0;
+              const isLess = cat.diff < 0;
+              return (
+                <div key={cat.categoryId} className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-muted-bg/30 transition-colors">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${cat.color}15` }}>
+                    <CatIcon className="w-4 h-4" style={{ color: cat.color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-card-foreground truncate">{cat.name}</p>
+                    <div className="flex items-center gap-2 text-[11px] text-muted mt-0.5">
+                      <span>T{compareData.prevMonth}: {formatVND(cat.previous)}</span>
+                      <span>→</span>
+                      <span>T{month}: {formatVND(cat.current)}</span>
+                    </div>
+                  </div>
+                  <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold shrink-0 ${
+                    isMore ? "bg-danger/10 text-danger" : isLess ? "bg-accent/10 text-accent" : "bg-muted-bg text-muted"
+                  }`}>
+                    {isMore ? <TrendingUp className="w-3 h-3" /> : isLess ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                    {isMore ? "+" : ""}{formatVND(cat.diff)}
+                    {cat.pct !== 0 && <span className="ml-0.5">({isMore ? "+" : ""}{cat.pct}%)</span>}
+                  </div>
+                </div>
+              );
+            })}
+            {compareData.categories.length === 0 && (
+              <p className="text-sm text-muted text-center py-4">Chưa có dữ liệu để so sánh</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

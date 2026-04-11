@@ -211,3 +211,20 @@ export const payerApi = {
   delete: (id: string) =>
     request<{ success: boolean }>(`/payers/${id}`, { method: "DELETE" }),
 };
+
+// Statistics
+export interface ComparisonCategory {
+  categoryId: string; name: string; color: string; icon: string;
+  current: number; previous: number; diff: number; pct: number;
+}
+
+export interface ComparisonData {
+  month: number; year: number; prevMonth: number; prevYear: number;
+  totalCurrent: number; totalPrevious: number; totalDiff: number; totalPct: number;
+  categories: ComparisonCategory[];
+}
+
+export const statisticsApi = {
+  compare: (month: number, year: number) =>
+    request<ComparisonData>(`/statistics/compare?month=${month}&year=${year}`),
+};
