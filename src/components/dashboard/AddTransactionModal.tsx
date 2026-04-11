@@ -135,8 +135,8 @@ export default function AddTransactionModal({ open, onClose }: Props) {
 
           <div>
             <label className="text-sm font-medium text-card-foreground mb-2 block">{t("addTx.note")}</label>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("addTx.notePlaceholder")} rows={2}
-              className="w-full px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30 resize-none" />
+            <textarea value={note} onChange={(e) => { setNote(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }} placeholder={t("addTx.notePlaceholder")} rows={1}
+              className="w-full px-4 py-2.5 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30 resize-none overflow-hidden" />
           </div>
 
           {/* Người */}
