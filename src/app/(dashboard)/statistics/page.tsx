@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PieChart as PieChartIcon, Filter } from "lucide-react";
+import { PieChart as PieChartIcon, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import { useTransactions, useCategories } from "@/lib/hooks";
 import { formatVND, formatShortVND } from "@/lib/utils";
@@ -22,11 +22,21 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 }
 
 export default function StatisticsPage() {
-  const { data } = useTransactions();
+  const now = new Date();
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(now.getFullYear());
+
+  const startDate = new Date(year, month - 1, 1).toISOString();
+  const endDate = new Date(year, month, 0, 23, 59, 59).toISOString();
+  const { data } = useTransactions({ startDate, endDate, limit: "9999" });
   const { data: catData } = useCategories();
   const t = useT();
   const [filterCat, setFilterCat] = useState("all");
   const [filterPayer, setFilterPayer] = useState("all");
+
+  function prevMonth() { if (month === 1) { setMonth(12); setYear(year - 1); } else setMonth(month - 1); }
+  function nextMonth() { if (month === 12) { setMonth(1); setYear(year + 1); } else setMonth(month + 1); }
+  const monthNames = ["", "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
 
   const allTxs = data?.transactions || [];
   const categories = catData?.categories || [];
@@ -68,6 +78,20 @@ export default function StatisticsPage() {
       <div className="flex items-center gap-3">
         <div className="bg-primary-light/10 text-primary-light p-3 rounded-xl"><PieChartIcon className="w-6 h-6" /></div>
         <div><h1 className="text-2xl font-bold text-foreground">{t("stats.title")}</h1><p className="text-muted text-sm">{t("stats.subtitle")}</p></div>
+      </div>
+
+      {/* Month selector */}
+      <div className="flex items-center justify-center gap-4">
+        <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <div className="text-center min-w-[140px]">
+          <p className="text-lg font-bold text-foreground">{monthNames[month]}</p>
+          <p className="text-xs text-muted">{year}</p>
+        </div>
+        <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Filters */}

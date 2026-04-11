@@ -24,8 +24,6 @@ model User {
   savingsItems          SavingsItem[]
   loans                 Loan[]
   assetTypes            AssetType[]
-  recurringTransactions RecurringTransaction[]
-
   @@map("users")
 }
 
@@ -157,19 +155,3 @@ model LoanPayment {
   @@map("loan_payments")
 }
 
-model RecurringTransaction {
-  id          String   @id @default(cuid())
-  userId      String   @map("user_id")
-  categoryId  String   @map("category_id")
-  amount      Float
-  type        String
-  note        String   @default("")
-  frequency   String
-  nextRunDate DateTime @map("next_run_date")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("recurring_transactions")
-}

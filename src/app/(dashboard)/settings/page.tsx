@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   Settings,
-  Bell,
   Palette,
-  Shield,
   Download,
   Trash2,
   Users,
@@ -28,42 +26,12 @@ import { useUpdateUserSettings } from "@/lib/hooks";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
-interface SettingToggleProps {
-  label: string;
-  description: string;
-  enabled: boolean;
-  onToggle: () => void;
-}
-
-function SettingToggle({ label, description, enabled, onToggle }: SettingToggleProps) {
-  return (
-    <div className="flex items-center justify-between py-4 border-b border-border last:border-0">
-      <div>
-        <p className="text-sm font-medium text-card-foreground">{label}</p>
-        <p className="text-xs text-muted mt-0.5">{description}</p>
-      </div>
-      <button
-        onClick={onToggle}
-        className={`relative w-11 h-6 rounded-full transition-colors ${enabled ? "bg-accent" : "bg-muted-bg border border-border"}`}
-        role="switch"
-        aria-checked={enabled}
-        aria-label={label}
-      >
-        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${enabled ? "translate-x-5.5" : "translate-x-0.5"}`} />
-      </button>
-    </div>
-  );
-}
-
 export default function SettingsPage() {
   const { theme, toggle: toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const { currency, language, setCurrency, setLanguage } = useSettings();
   const updateSettings = useUpdateUserSettings();
   const t = useT();
-  const [notifications, setNotifications] = useState(true);
-  const [budgetAlerts, setBudgetAlerts] = useState(true);
-  const [dailyReminder, setDailyReminder] = useState(false);
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [payers, setPayers] = useState<{name: string; color: string}[]>([]);
@@ -400,16 +368,6 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Notifications */}
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <Bell className="w-5 h-5 text-primary-light" />
-          <h3 className="text-base font-semibold text-card-foreground">{t("settings.notifications")}</h3>
-        </div>
-        <SettingToggle label={t("settings.notiGeneral")} description={t("settings.notiGeneralDesc")} enabled={notifications} onToggle={() => setNotifications(!notifications)} />
-        <SettingToggle label={t("settings.notiBudget")} description={t("settings.notiBudgetDesc")} enabled={budgetAlerts} onToggle={() => setBudgetAlerts(!budgetAlerts)} />
-        <SettingToggle label={t("settings.notiDaily")} description={t("settings.notiDailyDesc")} enabled={dailyReminder} onToggle={() => setDailyReminder(!dailyReminder)} />
-      </div>
 
       {/* Export */}
       <div className="bg-card rounded-2xl border border-border p-5">
@@ -432,28 +390,6 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Security */}
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <Shield className="w-5 h-5 text-primary-light" />
-          <h3 className="text-base font-semibold text-card-foreground">{t("settings.security")}</h3>
-        </div>
-        <div className="flex items-center justify-between py-4 cursor-pointer hover:bg-muted-bg/30 -mx-5 px-5 transition-colors">
-          <div><p className="text-sm font-medium text-card-foreground">{t("settings.2fa")}</p><p className="text-xs text-muted mt-0.5">{t("settings.2faDesc")}</p></div>
-        </div>
-      </div>
-
-      {/* Danger zone */}
-      <div className="bg-card rounded-2xl border border-danger/20 p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <Trash2 className="w-5 h-5 text-danger" />
-          <h3 className="text-base font-semibold text-danger">{t("settings.danger")}</h3>
-        </div>
-        <div className="flex items-center justify-between py-4">
-          <div><p className="text-sm font-medium text-card-foreground">{t("settings.deleteAccount")}</p><p className="text-xs text-muted mt-0.5">{t("settings.deleteAccountDesc")}</p></div>
-          <button className="px-4 py-2 text-sm font-medium text-danger border border-danger/30 rounded-xl hover:bg-danger/10 transition-colors">{t("settings.delete")}</button>
-        </div>
-      </div>
     </div>
   );
 }
