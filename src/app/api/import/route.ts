@@ -152,10 +152,11 @@ export async function POST(req: NextRequest) {
         const finalAmount = Math.abs(amount);
 
         // Type
-        let type: "income" | "expense" = amount < 0 ? "expense" : "income";
+        let type: "income" | "expense" = amount < 0 ? "expense" : "expense";
         if (cols.type) {
           const rawType = String(row[cols.type] || "").toLowerCase();
           if (rawType.includes("thu") || rawType.includes("income")) type = "income";
+          else if (rawType.includes("chi") || rawType.includes("expense")) type = "expense";
         }
 
         // Category

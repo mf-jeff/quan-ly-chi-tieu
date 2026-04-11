@@ -98,8 +98,12 @@ export default function TransactionsPage() {
     : filterPayer === "_empty" ? allTxs.filter((tx) => !tx.payer)
     : allTxs.filter((tx) => tx.payer === filterPayer);
 
-  const totalIncome = serverTotals.income;
-  const totalExpense = serverTotals.expense;
+  const totalIncome = filterPayer !== "all"
+    ? txs.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0)
+    : serverTotals.income;
+  const totalExpense = filterPayer !== "all"
+    ? txs.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0)
+    : serverTotals.expense;
 
   // Set default date value when switching filter mode
   function handleDateFilterChange(mode: DateFilter) {
@@ -265,20 +269,25 @@ export default function TransactionsPage() {
             <div className="flex items-center gap-2">
               <span className="text-xs text-danger">Xóa {selected.size} giao dịch?</span>
               <button onClick={async () => {
-                const token = getToken();
-                await fetch("/api/transactions/batch-delete", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                  body: JSON.stringify({ ids: Array.from(selected) }),
-                });
-                const count = selected.size;
-                setSelected(new Set()); setConfirmBatchDelete(false);
-                await qc.invalidateQueries({ queryKey: ["transactions"] });
-                qc.invalidateQueries({ queryKey: ["budgets"] });
-                const remaining = pagination.total - count;
-                const maxPage = Math.max(1, Math.ceil(remaining / 50));
-                if (page > maxPage) setPage(maxPage);
-                toast.success(`Đã xóa ${count} giao dịch`);
+                try {
+                  const token = getToken();
+                  const res = await fetch("/api/transactions/batch-delete", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ ids: Array.from(selected) }),
+                  });
+                  if (!res.ok) throw new Error("Xóa thất bại");
+                  const count = selected.size;
+                  setSelected(new Set()); setConfirmBatchDelete(false);
+                  await qc.invalidateQueries({ queryKey: ["transactions"] });
+                  qc.invalidateQueries({ queryKey: ["budgets"] });
+                  const remaining = pagination.total - count;
+                  const maxPage = Math.max(1, Math.ceil(remaining / 50));
+                  if (page > maxPage) setPage(maxPage);
+                  toast.success(`Đã xóa ${count} giao dịch`);
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : "Lỗi khi xóa");
+                }
               }} className="px-3 py-1.5 text-sm font-medium text-white bg-danger rounded-xl hover:bg-danger/90 transition-colors">Xóa</button>
               <button onClick={() => setConfirmBatchDelete(false)} className="px-3 py-1.5 text-sm text-muted">Hủy</button>
             </div>

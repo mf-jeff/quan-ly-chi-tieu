@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { useCategories } from "@/lib/hooks";
+import { useCategories, usePayers } from "@/lib/hooks";
 import { transactionApi } from "@/lib/api";
 import { getIcon } from "@/lib/icon-map";
 import { formatVND, toVNISOString, safeEvalExpr } from "@/lib/utils";
@@ -43,7 +43,8 @@ export default function EditTransactionModal({ open, onClose, data }: Props) {
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [payers, setPayers] = useState<{name: string; color: string}[]>([]);
+  const { data: payerData } = usePayers();
+  const payers = payerData?.payers || [];
 
   useEffect(() => {
     if (data) {
@@ -58,19 +59,6 @@ export default function EditTransactionModal({ open, onClose, data }: Props) {
     }
   }, [data]);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("payer-list");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.length > 0 && typeof parsed[0] === "string") {
-          setPayers(parsed.map((name: string) => ({ name, color: "#3b82f6" })));
-        } else {
-          setPayers(parsed);
-        }
-      }
-    } catch { /* empty */ }
-  }, [open]);
 
   const filtered = categories.filter((c) => c.type === type || c.type === "both");
 

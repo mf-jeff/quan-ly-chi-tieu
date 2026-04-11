@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
-import { useCategories, useAddTransaction } from "@/lib/hooks";
+import { useCategories, useAddTransaction, usePayers } from "@/lib/hooks";
 import { getIcon } from "@/lib/icon-map";
 import { formatVND, toVNISOString, safeEvalExpr } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -25,21 +25,8 @@ export default function AddTransactionModal({ open, onClose }: Props) {
   const [note, setNote] = useState("");
   const [payer, setPayer] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
-  const [payers, setPayers] = useState<{name: string; color: string}[]>([]);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("payer-list");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.length > 0 && typeof parsed[0] === "string") {
-          setPayers(parsed.map((name: string) => ({ name, color: "#3b82f6" })));
-        } else {
-          setPayers(parsed);
-        }
-      }
-    } catch { /* empty */ }
-  }, [open]);
+  const { data: payerData } = usePayers();
+  const payers = payerData?.payers || [];
   const [dateVal, setDateVal] = useState(() => { const d = toVNISOString(new Date()); return d.slice(0, 10); });
   const [timeVal, setTimeVal] = useState(() => { const d = toVNISOString(new Date()); return d.slice(11, 16); });
   const [error, setError] = useState("");
