@@ -24,6 +24,7 @@ model User {
   savingsItems          SavingsItem[]
   loans                 Loan[]
   assetTypes            AssetType[]
+  payers                Payer[]
   @@map("users")
 }
 
@@ -153,5 +154,17 @@ model LoanPayment {
 
   @@index([loanId])
   @@map("loan_payments")
+}
+
+model Payer {
+  id     String @id @default(cuid())
+  userId String @map("user_id")
+  name   String
+  color  String @default("#3b82f6")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@map("payers")
 }
 

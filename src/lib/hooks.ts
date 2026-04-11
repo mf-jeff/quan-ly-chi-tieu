@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { transactionApi, categoryApi, budgetApi, savingsApi, userSettingsApi, assetTypeApi, loanApi } from "./api";
+import { transactionApi, categoryApi, budgetApi, savingsApi, userSettingsApi, assetTypeApi, loanApi, payerApi } from "./api";
 import { useDateStore } from "./date-store";
 import { toast } from "sonner";
 
@@ -209,6 +209,39 @@ export function useDeleteLoanPayment() {
     mutationFn: ({ loanId, paymentId }: { loanId: string; paymentId: string }) =>
       loanApi.deletePayment(loanId, paymentId),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["loans"] }); toast.success("Đã xóa"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// --- Payers ---
+
+export function usePayers() {
+  return useQuery({ queryKey: ["payers"], queryFn: payerApi.list });
+}
+
+export function useAddPayer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: payerApi.create,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["payers"] }); toast.success("Đã thêm"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUpdatePayer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; color?: string } }) => payerApi.update(id, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["payers"] }); toast.success("Đã cập nhật"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeletePayer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: payerApi.delete,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["payers"] }); toast.success("Đã xóa"); },
     onError: (e: Error) => toast.error(e.message),
   });
 }

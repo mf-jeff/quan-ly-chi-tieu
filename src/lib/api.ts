@@ -196,3 +196,18 @@ export const exportApi = {
     URL.revokeObjectURL(url);
   },
 };
+
+// Payers
+export interface PayerData {
+  id: string; name: string; color: string;
+}
+
+export const payerApi = {
+  list: () => request<{ payers: PayerData[] }>("/payers"),
+  create: (data: { name: string; color?: string }) =>
+    request<{ payer: PayerData }>("/payers", { method: "POST", body: JSON.stringify(data) }),
+  update: (id: string, data: { name?: string; color?: string }) =>
+    request<{ payer: PayerData }>(`/payers/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  delete: (id: string) =>
+    request<{ success: boolean }>(`/payers/${id}`, { method: "DELETE" }),
+};

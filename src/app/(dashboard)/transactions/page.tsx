@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { ArrowRightLeft, Search, Filter, Plus, ArrowUpRight, ArrowDownRight, Trash2, Settings2, CalendarDays, X, Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Pencil } from "lucide-react";
 import { ListSkeleton } from "@/components/ui/Skeleton";
-import { useTransactions, useDeleteTransaction, useCategories } from "@/lib/hooks";
+import { useTransactions, useDeleteTransaction, useCategories, usePayers } from "@/lib/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { getIcon } from "@/lib/icon-map";
 import { formatVND, formatDateVN, formatDateShort } from "@/lib/utils";
@@ -45,22 +45,8 @@ export default function TransactionsPage() {
   const [dateFilter, setDateFilter] = useState<DateFilter>("month");
   const [dateValue, setDateValue] = useState(new Date().toISOString().slice(0, 7));
   const [filterPayer, setFilterPayer] = useState("all");
-  const [payerList, setPayerList] = useState<{name: string; color: string}[]>([]);
-
-  function loadPayers() {
-    try {
-      const saved = localStorage.getItem("payer-list");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.length > 0 && typeof parsed[0] === "string") {
-          setPayerList(parsed.map((name: string) => ({ name, color: "#3b82f6" })));
-        } else {
-          setPayerList(parsed);
-        }
-      }
-    } catch { /* empty */ }
-  }
-  useEffect(loadPayers, []);
+  const { data: payerData } = usePayers();
+  const payerList = payerData?.payers || [];
 
   const payerColors = useMemo(() => {
     const map: Record<string, string> = {};
@@ -426,8 +412,8 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      <AddTransactionModal open={showAddModal} onClose={() => { setShowAddModal(false); loadPayers(); }} />
-      <EditTransactionModal open={!!editTx} onClose={() => { setEditTx(null); loadPayers(); }} data={editTx} />
+      <AddTransactionModal open={showAddModal} onClose={() => setShowAddModal(false)} />
+      <EditTransactionModal open={!!editTx} onClose={() => setEditTx(null)} data={editTx} />
       <CategoryManager open={showCategoryManager} onClose={() => setShowCategoryManager(false)} />
 
       {/* Import Modal */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Settings,
   Palette,
@@ -22,7 +22,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useAuth } from "@/lib/auth-store";
 import { useSettings, currencies, languages } from "@/lib/settings-store";
 import { exportApi } from "@/lib/api";
-import { useUpdateUserSettings } from "@/lib/hooks";
+import { useUpdateUserSettings, usePayers, useAddPayer, useUpdatePayer, useDeletePayer } from "@/lib/hooks";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
@@ -34,34 +34,15 @@ export default function SettingsPage() {
   const t = useT();
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
-  const [payers, setPayers] = useState<{name: string; color: string}[]>([]);
+  const { data: payerData } = usePayers();
+  const addPayer = useAddPayer();
+  const updatePayer = useUpdatePayer();
+  const deletePayer = useDeletePayer();
+  const payers = payerData?.payers || [];
   const [newPayerName, setNewPayerName] = useState("");
   const [editPayerColor, setEditPayerColor] = useState<string | null>(null);
 
   const payerColors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316", "#22c55e", "#6366f1", "#d946ef", "#14b8a6"];
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("payer-list");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Migrate old string[] format to {name, color}[]
-        if (parsed.length > 0 && typeof parsed[0] === "string") {
-          const migrated = parsed.map((name: string, i: number) => ({ name, color: payerColors[i % payerColors.length] }));
-          setPayers(migrated);
-          localStorage.setItem("payer-list", JSON.stringify(migrated));
-        } else {
-          setPayers(parsed);
-        }
-      }
-    } catch { /* empty */ }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function savePayers(list: {name: string; color: string}[]) {
-    setPayers(list);
-    localStorage.setItem("payer-list", JSON.stringify(list));
-  }
 
   // Profile edit
   const [editProfile, setEditProfile] = useState(false);
@@ -323,23 +304,23 @@ export default function SettingsPage() {
         </div>
         <div className="space-y-2">
           {payers.map((p) => (
-            <div key={p.name} className="rounded-xl border border-border">
+            <div key={p.id} className="rounded-xl border border-border">
               <div className="flex items-center gap-3 py-2.5 px-3">
                 <div className="w-7 h-7 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
                 <span className="text-sm font-medium text-card-foreground flex-1">{p.name}</span>
-                <button onClick={() => setEditPayerColor(editPayerColor === p.name ? null : p.name)}
+                <button onClick={() => setEditPayerColor(editPayerColor === p.id ? null : p.id)}
                   className="p-1.5 text-muted hover:text-primary-light hover:bg-primary-light/10 rounded-lg transition-colors">
                   <Palette className="w-4 h-4" />
                 </button>
-                <button onClick={() => savePayers(payers.filter((x) => x.name !== p.name))}
+                <button onClick={() => deletePayer.mutate(p.id)}
                   className="p-1.5 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              {editPayerColor === p.name && (
+              {editPayerColor === p.id && (
                 <div className="px-3 pb-3 flex flex-wrap gap-1.5">
                   {payerColors.map((c) => (
-                    <button key={c} onClick={() => { savePayers(payers.map((x) => x.name === p.name ? { ...x, color: c } : x)); setEditPayerColor(null); }}
+                    <button key={c} onClick={() => { updatePayer.mutate({ id: p.id, data: { color: c } }); setEditPayerColor(null); }}
                       className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${p.color === c ? "border-foreground scale-110" : "border-transparent"}`}
                       style={{ backgroundColor: c }} />
                   ))}
@@ -351,15 +332,15 @@ export default function SettingsPage() {
           <div className="flex gap-2 pt-1">
             <input type="text" value={newPayerName} onChange={(e) => setNewPayerName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && newPayerName.trim() && !payers.some((p) => p.name === newPayerName.trim())) {
-                  savePayers([...payers, { name: newPayerName.trim(), color: payerColors[payers.length % payerColors.length] }]); setNewPayerName("");
+                if (e.key === "Enter" && newPayerName.trim()) {
+                  addPayer.mutate({ name: newPayerName.trim(), color: payerColors[payers.length % payerColors.length] }); setNewPayerName("");
                 }
               }}
               placeholder="Thêm người mới..."
               className="flex-1 px-3 py-2 bg-muted-bg border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
             <button onClick={() => {
-              if (newPayerName.trim() && !payers.some((p) => p.name === newPayerName.trim())) {
-                savePayers([...payers, { name: newPayerName.trim(), color: payerColors[payers.length % payerColors.length] }]); setNewPayerName("");
+              if (newPayerName.trim()) {
+                addPayer.mutate({ name: newPayerName.trim(), color: payerColors[payers.length % payerColors.length] }); setNewPayerName("");
               }
             }} className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary-light transition-colors">
               <Plus className="w-4 h-4" />
