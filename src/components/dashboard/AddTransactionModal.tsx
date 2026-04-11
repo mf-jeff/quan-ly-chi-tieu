@@ -87,7 +87,7 @@ export default function AddTransactionModal({ open, onClose }: Props) {
             <div className="flex gap-1.5 mt-1.5">
               {["+", "-", "*", "/", "(", ")"].map((op) => (
                 <button key={op} type="button" onClick={() => setAmount(amount + op)}
-                  className="flex-1 py-1.5 bg-muted-bg border border-border rounded-lg text-sm font-bold text-muted hover:text-primary-light hover:border-primary-light/30 transition-colors">{op}</button>
+                  className="flex-1 py-2.5 bg-muted-bg border border-border rounded-lg text-sm font-bold text-muted hover:text-primary-light hover:border-primary-light/30 transition-colors">{op}</button>
               ))}
             </div>
             {amount && (() => {

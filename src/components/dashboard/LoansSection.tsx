@@ -240,28 +240,28 @@ function LoanBlock({ type, icon: Icon, color, title, loans, totalUnpaid }: {
                                     {loan.note && <span className="italic">{loan.note}</span>}
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-0.5 ml-2 shrink-0">
+                                <div className="flex items-center gap-1 ml-2 shrink-0 flex-wrap justify-end">
                                   {!loan.isPaid && (
                                     <button onClick={() => { setPayingLoanId(payingLoanId === loan.id ? null : loan.id); setPayAmount(""); setPayNote(""); }}
-                                      className="p-1 text-muted hover:text-accent rounded text-[10px]" title="Ghi nhận trả tiền">💰</button>
+                                      className="p-2 text-muted hover:text-accent rounded-lg hover:bg-accent/10 transition-colors" title="Ghi nhận trả tiền"><span className="text-sm">💰</span></button>
                                   )}
                                   {payments.length > 0 && (
                                     <button onClick={() => setShowPaymentsId(showingPayments ? null : loan.id)}
-                                      className={`p-1 rounded relative ${showingPayments ? "text-primary-light" : "text-muted hover:text-primary-light"}`} title="Lịch sử trả tiền">
-                                      <History className="w-3.5 h-3.5" />
-                                      <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 text-[8px] bg-primary-light text-white rounded-full flex items-center justify-center">{payments.length}</span>
+                                      className={`p-2 rounded-lg relative transition-colors ${showingPayments ? "text-primary-light bg-primary-light/10" : "text-muted hover:text-primary-light hover:bg-primary-light/10"}`} title="Lịch sử trả tiền">
+                                      <History className="w-4 h-4" />
+                                      <span className="absolute -top-0.5 -right-0.5 w-4 h-4 text-[9px] bg-primary-light text-white rounded-full flex items-center justify-center">{payments.length}</span>
                                     </button>
                                   )}
                                   {!loan.isPaid && (
                                     <button onClick={() => updateLoan.mutate({ id: loan.id, data: { paidAmount: loan.amount, isPaid: true } })}
-                                      className="p-1 text-muted hover:text-accent rounded" title="Trả hết"><CheckCircle2 className="w-3.5 h-3.5" /></button>
+                                      className="p-2 text-muted hover:text-accent rounded-lg hover:bg-accent/10 transition-colors" title="Trả hết"><CheckCircle2 className="w-4 h-4" /></button>
                                   )}
                                   {loan.isPaid && (
                                     <button onClick={() => updateLoan.mutate({ id: loan.id, data: { isPaid: false } })}
-                                      className="p-1 text-accent hover:text-warning rounded" title="Hoàn tác trả hết"><CheckCircle2 className="w-3.5 h-3.5" /></button>
+                                      className="p-2 text-accent hover:text-warning rounded-lg hover:bg-warning/10 transition-colors" title="Hoàn tác trả hết"><CheckCircle2 className="w-4 h-4" /></button>
                                   )}
-                                  <button onClick={() => setEditingLoanId(editingLoanId === loan.id ? null : loan.id)} className="p-1 text-muted hover:text-primary-light rounded" title="Sửa khoản vay"><Pencil className="w-3 h-3" /></button>
-                                  <button onClick={() => { if (confirm("Xóa khoản vay này?")) deleteLoan.mutate(loan.id); }} className="p-1 text-muted hover:text-danger rounded" title="Xóa"><Trash2 className="w-3 h-3" /></button>
+                                  <button onClick={() => setEditingLoanId(editingLoanId === loan.id ? null : loan.id)} className="p-2 text-muted hover:text-primary-light rounded-lg hover:bg-primary-light/10 transition-colors" title="Sửa khoản vay"><Pencil className="w-4 h-4" /></button>
+                                  <button onClick={() => { if (confirm("Xóa khoản vay này?")) deleteLoan.mutate(loan.id); }} className="p-2 text-muted hover:text-danger rounded-lg hover:bg-danger/10 transition-colors" title="Xóa"><Trash2 className="w-4 h-4" /></button>
                                 </div>
                               </div>
 

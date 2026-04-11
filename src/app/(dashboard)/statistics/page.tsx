@@ -123,21 +123,21 @@ export default function StatisticsPage() {
             <span className="text-muted text-xs">Số dư</span>
             <Wallet className="w-4 h-4 text-primary-light" />
           </div>
-          <p className={`text-lg font-bold ${monthBalance >= 0 ? "text-card-foreground" : "text-danger"}`}>{formatVND(monthBalance)}</p>
+          <p className={`text-base sm:text-lg font-bold truncate ${monthBalance >= 0 ? "text-card-foreground" : "text-danger"}`}>{formatVND(monthBalance)}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-accent">
+        <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-accent overflow-hidden">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted text-xs">Thu nhập</span>
             <TrendingUp className="w-4 h-4 text-accent" />
           </div>
-          <p className="text-lg font-bold text-accent">{formatVND(monthIncome)}</p>
+          <p className="text-base sm:text-lg font-bold text-accent truncate">{formatVND(monthIncome)}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-danger">
+        <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-danger overflow-hidden">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted text-xs">Chi tiêu</span>
             <TrendingDown className="w-4 h-4 text-danger" />
           </div>
-          <p className="text-lg font-bold text-danger">{formatVND(monthExpense)}</p>
+          <p className="text-base sm:text-lg font-bold text-danger truncate">{formatVND(monthExpense)}</p>
         </div>
         <div className="bg-card rounded-2xl border border-border p-4 border-t-[3px] border-t-warning">
           <div className="flex items-center justify-between mb-2">

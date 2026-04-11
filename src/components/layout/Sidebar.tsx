@@ -43,7 +43,7 @@ export default function Sidebar() {
     <>
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-sidebar h-12 flex items-center justify-between px-4">
-        <button onClick={() => setMobileMenu(!mobileMenu)} className="flex items-center gap-2">
+        <button onClick={() => setMobileMenu(!mobileMenu)} className="flex items-center gap-2 py-2 pr-3">
           <VaultLogo size={24} className="text-warning" />
           <span className="text-warning font-extrabold text-lg">Vault</span>
           <Menu className="w-5 h-5 text-sidebar-foreground/60" />

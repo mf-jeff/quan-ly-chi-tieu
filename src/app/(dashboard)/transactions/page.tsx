@@ -152,11 +152,11 @@ export default function TransactionsPage() {
           </div>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <button onClick={() => setShowCategoryManager(true)} className="p-2 sm:px-4 sm:py-2.5 border border-border text-muted rounded-xl hover:text-primary-light transition-colors text-sm" title={t("tx.category")}>
-            <Settings2 className="w-4 h-4" /><span className="hidden sm:inline ml-1">{t("tx.category")}</span>
+          <button onClick={() => setShowCategoryManager(true)} className="p-2.5 sm:px-4 sm:py-2.5 border border-border text-muted rounded-xl hover:text-primary-light transition-colors text-sm" title={t("tx.category")}>
+            <Settings2 className="w-5 h-5 sm:w-4 sm:h-4" /><span className="hidden sm:inline ml-1">{t("tx.category")}</span>
           </button>
-          <button onClick={() => setShowImport(true)} className="p-2 sm:px-4 sm:py-2.5 border border-border text-muted rounded-xl hover:text-accent transition-colors text-sm" title="Import">
-            <Upload className="w-4 h-4" /><span className="hidden sm:inline ml-1">Import</span>
+          <button onClick={() => setShowImport(true)} className="p-2.5 sm:px-4 sm:py-2.5 border border-border text-muted rounded-xl hover:text-accent transition-colors text-sm" title="Import">
+            <Upload className="w-5 h-5 sm:w-4 sm:h-4" /><span className="hidden sm:inline ml-1">Import</span>
           </button>
           <button onClick={() => setShowAddModal(true)} className="flex items-center gap-1 bg-primary text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl hover:bg-primary-light transition-colors text-sm font-medium">
             <Plus className="w-4 h-4" /><span className="hidden sm:inline">{t("tx.add")}</span>
@@ -166,13 +166,13 @@ export default function TransactionsPage() {
 
       {/* Summary */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="bg-card rounded-2xl border border-border p-4 flex items-center gap-3">
-          <div className="bg-accent/10 p-2.5 rounded-xl"><ArrowUpRight className="w-5 h-5 text-accent" /></div>
-          <div><p className="text-muted text-xs">{t("tx.totalIncome")}</p><p className="text-lg font-bold text-accent">{formatVND(totalIncome)}</p></div>
+        <div className="bg-card rounded-2xl border border-border p-4 flex items-center gap-3 overflow-hidden">
+          <div className="bg-accent/10 p-2.5 rounded-xl shrink-0"><ArrowUpRight className="w-5 h-5 text-accent" /></div>
+          <div className="min-w-0"><p className="text-muted text-xs">{t("tx.totalIncome")}</p><p className="text-base sm:text-lg font-bold text-accent truncate">{formatVND(totalIncome)}</p></div>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-4 flex items-center gap-3">
-          <div className="bg-danger/10 p-2.5 rounded-xl"><ArrowDownRight className="w-5 h-5 text-danger" /></div>
-          <div><p className="text-muted text-xs">{t("tx.totalExpense")}</p><p className="text-lg font-bold text-danger">{formatVND(totalExpense)}</p></div>
+        <div className="bg-card rounded-2xl border border-border p-4 flex items-center gap-3 overflow-hidden">
+          <div className="bg-danger/10 p-2.5 rounded-xl shrink-0"><ArrowDownRight className="w-5 h-5 text-danger" /></div>
+          <div className="min-w-0"><p className="text-muted text-xs">{t("tx.totalExpense")}</p><p className="text-base sm:text-lg font-bold text-danger truncate">{formatVND(totalExpense)}</p></div>
         </div>
       </div>
 

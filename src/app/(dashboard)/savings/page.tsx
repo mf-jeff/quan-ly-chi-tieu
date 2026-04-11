@@ -359,8 +359,8 @@ export default function SavingsPage() {
                             ? `${item.goldUnit} chỉ${item.goldUnit >= 10 ? ` (${Math.floor(item.goldUnit / 10)} cây)` : ""}`
                             : formatVND(item.amount)}
                         </span>
-                        <button onClick={() => openEdit(item)} className="p-1 text-muted hover:text-primary-light rounded-lg transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => deleteItem.mutate(item.id)} className="p-1 text-muted hover:text-danger rounded-lg transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => openEdit(item)} className="p-2 text-muted hover:text-primary-light hover:bg-primary-light/10 rounded-lg transition-colors"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => deleteItem.mutate(item.id)} className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
 
