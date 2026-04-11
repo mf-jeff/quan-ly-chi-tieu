@@ -43,19 +43,18 @@ export async function GET(req: NextRequest) {
     percentage: b.amount > 0 ? Math.round(((spentMap[b.categoryId] || 0) / b.amount) * 100) : 0,
   }));
 
-  // Add categories that have spending but no budget set
-  const missingCategoryIds = Object.keys(spentMap).filter((id) => !budgetCategoryIds.has(id));
-  if (missingCategoryIds.length > 0) {
-    const missingCategories = await prisma.category.findMany({
-      where: { id: { in: missingCategoryIds } },
-    });
+  // Add ALL categories that don't have a budget record yet
+  const allCategories = await prisma.category.findMany({
+    where: { userId: payload.userId, type: { in: ["expense", "both"] } },
+  });
 
-    for (const cat of missingCategories) {
+  for (const cat of allCategories) {
+    if (!budgetCategoryIds.has(cat.id)) {
       result.push({
         id: `auto-${cat.id}`,
         userId: payload.userId,
         categoryId: cat.id,
-        amount: 0, // no budget set
+        amount: 0,
         month,
         year,
         category: cat,
