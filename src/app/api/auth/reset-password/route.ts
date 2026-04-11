@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/db";
-import { hashPassword } from "@/lib/server/auth";
+import { hashPassword, jwtSecret } from "@/lib/server/auth";
 import { jwtVerify } from "jose";
-
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback");
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +18,7 @@ export async function POST(req: NextRequest) {
     // Verify token
     let payload;
     try {
-      const result = await jwtVerify(token, secret);
+      const result = await jwtVerify(token, jwtSecret);
       payload = result.payload as { userId: string; type: string };
     } catch {
       return NextResponse.json({ error: "Link đã hết hạn hoặc không hợp lệ" }, { status: 400 });

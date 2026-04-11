@@ -1,6 +1,50 @@
 import { VN_TIMEZONE } from "./constants";
 export { VN_TIMEZONE };
 
+/** Safe arithmetic expression parser — supports +, -, *, /, () only */
+export function safeEvalExpr(expr: string): number {
+  const cleaned = expr.replace(/[^0-9+\-*/().]/g, "");
+  if (!cleaned) return 0;
+  // Validate: only digits, operators, parens, dots
+  if (!/^[0-9+\-*/().]+$/.test(cleaned)) return 0;
+  // Reject empty parens or double operators
+  if (/\(\)/.test(cleaned) || /[+\-*/]{2,}/.test(cleaned.replace(/[()]/g, ""))) return 0;
+
+  // Recursive descent parser
+  let pos = 0;
+  function peek() { return cleaned[pos]; }
+  function next() { return cleaned[pos++]; }
+
+  function parseNum(): number {
+    if (peek() === "(") { next(); const v = parseExpr(); next(); return v; }
+    if (peek() === "-") { next(); return -parseNum(); }
+    let s = "";
+    while (pos < cleaned.length && /[0-9.]/.test(peek())) s += next();
+    return parseFloat(s) || 0;
+  }
+
+  function parseTerm(): number {
+    let v = parseNum();
+    while (pos < cleaned.length && (peek() === "*" || peek() === "/")) {
+      const op = next();
+      const r = parseNum();
+      v = op === "*" ? v * r : r !== 0 ? v / r : 0;
+    }
+    return v;
+  }
+
+  function parseExpr(): number {
+    let v = parseTerm();
+    while (pos < cleaned.length && (peek() === "+" || peek() === "-")) {
+      const op = next();
+      v = op === "+" ? v + parseTerm() : v - parseTerm();
+    }
+    return v;
+  }
+
+  try { return parseExpr(); } catch { return 0; }
+}
+
 export function nowVN(): Date {
   return new Date(
     new Date().toLocaleString("en-US", { timeZone: VN_TIMEZONE })

@@ -67,11 +67,8 @@ export default function LoginPage() {
 
           {/* Password */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="mb-1.5">
               <label className="text-sm font-medium text-card-foreground">{t("auth.password")}</label>
-              <Link href="/forgot-password" className="text-xs text-primary-light hover:underline">
-                Quên mật khẩu?
-              </Link>
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />

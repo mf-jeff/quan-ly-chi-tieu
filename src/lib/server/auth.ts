@@ -2,21 +2,25 @@ import { SignJWT, jwtVerify } from "jose";
 import { hashSync, compareSync } from "bcryptjs";
 import { NextRequest } from "next/server";
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || "fallback-secret-dev"
-);
+function getJwtSecret() {
+  const key = process.env.JWT_SECRET;
+  if (!key) throw new Error("JWT_SECRET environment variable is required");
+  return new TextEncoder().encode(key);
+}
+
+export const jwtSecret = getJwtSecret();
 
 export async function signToken(payload: { userId: string; email: string }) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("7d")
     .setIssuedAt()
-    .sign(secret);
+    .sign(jwtSecret);
 }
 
 export async function verifyToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, jwtSecret);
     return payload as { userId: string; email: string };
   } catch {
     return null;

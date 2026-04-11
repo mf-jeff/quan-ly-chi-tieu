@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { useCategories } from "@/lib/hooks";
 import { transactionApi } from "@/lib/api";
 import { getIcon } from "@/lib/icon-map";
-import { formatVND, toVNISOString } from "@/lib/utils";
+import { formatVND, toVNISOString, safeEvalExpr } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -81,8 +81,7 @@ export default function EditTransactionModal({ open, onClose, data }: Props) {
     let parsedAmount = Number(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       try {
-        const expr = amount.replace(/[^0-9+\-*/().]/g, "");
-        parsedAmount = expr ? Function(`"use strict"; return (${expr})`)() : 0;
+        parsedAmount = safeEvalExpr(amount);
       } catch { parsedAmount = 0; }
     }
     if (!parsedAmount || parsedAmount <= 0) { setError(t("addTx.error.amount")); return; }
@@ -141,8 +140,7 @@ export default function EditTransactionModal({ open, onClose, data }: Props) {
               className="w-full px-4 py-3 bg-muted-bg border border-border rounded-xl text-lg font-semibold text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-light/30" />
             {amount && (() => {
               try {
-                const expr = amount.replace(/[^0-9+\-*/().]/g, "");
-                const result = expr ? Function(`"use strict"; return (${expr})`)() : 0;
+                const result = safeEvalExpr(amount);
                 if (typeof result === "number" && result > 0 && !isNaN(result)) {
                   return <p className="text-xs text-accent mt-1">= {formatVND(result)}</p>;
                 }

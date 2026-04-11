@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/db";
+import { jwtSecret } from "@/lib/server/auth";
 import { SignJWT } from "jose";
 import { Resend } from "resend";
-
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback");
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,7 +23,7 @@ export async function POST(req: NextRequest) {
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("1h")
       .setIssuedAt()
-      .sign(secret);
+      .sign(jwtSecret);
 
     // Build reset URL
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.headers.get("origin") || "https://vaultmoneymanager.vercel.app";
