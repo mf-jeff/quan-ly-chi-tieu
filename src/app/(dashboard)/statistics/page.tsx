@@ -99,15 +99,18 @@ export default function StatisticsPage() {
       </div>
 
       {/* Month selector */}
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-3">
         <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <button onClick={() => { setMonth(now.getMonth() + 1); setYear(now.getFullYear()); }}
-          className="text-center min-w-[140px] hover:bg-muted-bg rounded-xl py-1 transition-colors">
-          <p className="text-lg font-bold text-foreground">{monthNames[month]}</p>
-          <p className="text-xs text-muted">{year}{(month !== now.getMonth() + 1 || year !== now.getFullYear()) ? " · Bấm để về tháng này" : ""}</p>
-        </button>
+        <select value={`${year}-${month}`} onChange={(e) => { const [y, m] = e.target.value.split("-").map(Number); setMonth(m); setYear(y); }}
+          className="bg-card border border-border rounded-xl px-4 py-2 text-base font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary-light/30 text-center appearance-none cursor-pointer">
+          {Array.from({ length: 24 }, (_, i) => {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const m = d.getMonth() + 1; const y = d.getFullYear();
+            return <option key={`${y}-${m}`} value={`${y}-${m}`}>{monthNames[m]} {y}</option>;
+          })}
+        </select>
         <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-muted-bg text-muted hover:text-foreground transition-colors">
           <ChevronRight className="w-5 h-5" />
         </button>
